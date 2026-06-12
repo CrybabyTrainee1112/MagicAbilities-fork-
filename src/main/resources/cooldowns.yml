@@ -1,0 +1,160 @@
+
+ice:
+  bolt: 1.2
+  machine-gun: 8
+  spikes: 2.5
+  star: 14
+  multi-bolt: 5
+  slashes: 16
+  phase-change: 7
+
+warp:
+  default: 180
+
+lightning:
+  strike: 8
+  shot: 5
+  field: 22
+  transmission: 14
+  passive: 8
+  thunderclap: 18
+  ball: 28
+
+unstable:
+  heal-by-others: 300
+  heal-self: 60
+
+shogun:
+  double-jump: 3
+  dash: 10
+
+
+fire:
+  blast: 2
+  barrage: 6
+  surge: 8
+  flame: 50
+  meteor: 40
+  shield: 22
+  dash: 10
+  retaliation: 6
+
+witcher:
+  igni: 3
+  aard: 6
+  quen: 12
+  aksji: 9
+  yrden: 16
+
+nature:
+  tree: 15
+  thorn: 4
+  entangle: 18
+  spore: 14
+  lance: 16
+  heal: 30
+  retaliate: 7
+
+phoenix:
+  wings: 90
+  flame: 6
+  storm: 14
+  dive: 18
+  beam: 22
+  tornado: 28
+  ascend: 14
+  rebirth: 300
+
+twilight-mirage:
+  shriek-transition: 20
+  float: 3
+  missile: 4
+  healing: 30
+  eclipse: 22
+
+eternity:
+  immunity: 2
+  oblivion: 40
+  blink: 1
+
+curse-weaver:
+  domain: 60
+  cleave: 5
+  black: 8
+  dawn: 10
+
+thundergod:
+  triple: 5
+  wrath: 18
+  cage: 20
+  step: 10
+  judgment: 50
+  aura: 3
+
+wind:
+  slash: 3
+  cyclone: 18
+  burst: 8
+  step: 10
+  tempest: 25
+  leap: 14
+
+demon:
+  soulbolt: 4
+  hellfire: 22
+  cleave: 8
+  drain: 18
+  charge: 12
+  grasp: 14
+  counter: 6
+
+water:
+  bolt: 2.5
+  whirlpool: 16
+  wave: 9
+  dash: 8
+  tsunami: 35
+  bubble: 18
+  counter: 7
+  hydro: 28
+
+wither:
+  bolt: 3
+  barrage: 12
+  mark: 14
+  shatter: 8
+  storm: 25
+  rez: 90
+  aura: 1.5
+  kill: 8
+
+icedragon:
+  roar: 15
+  slash: 5
+  prison: 18
+  charge: 12
+  blizzard: 20
+  heaven: 55
+
+wooddragon:
+  roar: 15
+  blades: 6
+  net: 20
+  charge: 14
+  grove: 25
+  roots: 60
+
+snowblade:
+  slash: 2
+  step: 8
+  drive: 14
+  arctic: 35
+
+meteor:
+  shot: 3
+  rain: 20
+  slam: 9
+  gravity: 14
+  armor: 25
+  extinction: 60
+  scorch: 2

@@ -1,0 +1,8 @@
+debug: true
+// Consume xp
+snowblade:
+  xp:
+    slash: 3
+    step: 6
+    drive: 9
+    arctic: 12
