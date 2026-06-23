@@ -22,12 +22,17 @@ public class RandomPowerAssigner {
             PowerType.WIND,
             PowerType.DEMON,
             PowerType.WATER,
-            PowerType.Warp,
+            PowerType.WARP,
             PowerType.WITHER,
             PowerType.ICE_DRAGON,
             PowerType.WOOD_DRAGON,
             PowerType.SNOWPARTING_BLADE,
-            PowerType.METEOR_LORD
+            PowerType.METEOR_LORD,
+            PowerType.CULTIVATOR,
+            PowerType.BLOOD,
+            PowerType.CRYSTAL,
+            PowerType.EARTH,
+            PowerType.MAGNETIC
     ));
 
     private static final Random RNG = new Random();

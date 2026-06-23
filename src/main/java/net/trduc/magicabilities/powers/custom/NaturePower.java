@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -53,7 +54,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         super(owner);
     }
 
-
     @Override
     public void executePower(Execute ex) {
         if (ex instanceof DamagedByExecute) {
@@ -79,49 +79,47 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
             case 0:
-                if (onCd(nature_thorn, p)) return;
+                if (onCd(nature_thorn, p, this)) return;
                 thornVolley(p);
-                CooldownApi.addCooldown(nature_thorn, p, cooldowns.get(nature_thorn));
+                addCd(nature_thorn, p);
                 return;
             case 1:
-                if (onCd(nature_entangle, p)) return;
+                if (onCd(nature_entangle, p, this)) return;
                 entangle(p);
-                CooldownApi.addCooldown(nature_entangle, p, cooldowns.get(nature_entangle));
+                addCd(nature_entangle, p);
                 return;
             case 2:
-                if (onCd(nature_spore, p)) return;
+                if (onCd(nature_spore, p, this)) return;
                 sporeBurst(p);
-                CooldownApi.addCooldown(nature_spore, p, cooldowns.get(nature_spore));
+                addCd(nature_spore, p);
                 return;
             case 3:
-                if (onCd(nature_lance, p)) return;
+                if (onCd(nature_lance, p, this)) return;
                 rootLance(p);
-                CooldownApi.addCooldown(nature_lance, p, cooldowns.get(nature_lance));
+                addCd(nature_lance, p);
         }
     }
-
 
     private void onSneak(SneakExecute ex) {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
             case 4:
-                if (onCd(nature_heal, p)) return;
+                if (onCd(nature_heal, p, this)) return;
                 verdantHeal(p);
-                CooldownApi.addCooldown(nature_heal, p, cooldowns.get(nature_heal));
+                addCd(nature_heal, p);
                 return;
             case 0:
-                if (onCd(nature_tree, p)) return;
+                if (onCd(nature_tree, p, this)) return;
                 if (p.getWorld().generateTree(
                         p.getLocation().clone().add(p.getLocation().getDirection().clone().setY(0).normalize()),
                         TreeType.values()[new Random().nextInt(TreeType.values().length)])) {
-                    CooldownApi.addCooldown(nature_tree, p, cooldowns.get(nature_tree));
+                    addCd(nature_tree, p);
                 } else {
                     p.sendMessage(ChatColor.RED + "Couldn't spawn a tree here!");
                 }
         }
     }
-
 
     private void thornVolley(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BAMBOO_HIT, 1f, 0.7f);
@@ -269,7 +267,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         base.getWorld().playSound(base, Sound.BLOCK_ROOTED_DIRT_BREAK, 0.7f, 0.9f);
     }
 
-
     private void sporeBurst(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.6f, 0.4f);
 
@@ -335,7 +332,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
             ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,   60, 1, false, true));
         }
     }
-
 
     private void rootLance(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_ROOTED_DIRT_BREAK, 1f, 0.5f);
@@ -431,7 +427,7 @@ public class NaturePower extends Power implements IdlePower, Removeable {
                 }
 
                 double hp = p.getHealth();
-                p.setHealth(Math.min(p.getMaxHealth(), hp + healPerTick));
+                p.setHealth(Math.min(getMaxHp(p), hp + healPerTick));
                 healed += healPerTick;
 
                 double angle = Math.toRadians(t * 27);
@@ -457,7 +453,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void thornRetaliation(DamagedByExecute ex) {
         Player p = ex.getPlayer();
         if (CooldownApi.isOnCooldown(nature_retaliate, p)) return;
@@ -475,7 +470,7 @@ public class NaturePower extends Power implements IdlePower, Removeable {
                 Particle.CHERRY_LEAVES, 20, 0.5, 0.5, 0.5, 0.2);
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_AZALEA_LEAVES_HIT, 1f, 0.7f);
 
-        CooldownApi.addCooldown(nature_retaliate, p, 5.0);
+        addCdFixed(nature_retaliate, p, 5.0);
     }
 
     private long lastMoveProcess = 0;
@@ -496,7 +491,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         }
     }
 
-
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
         final Player p = ex.getPlayer();
@@ -505,17 +499,19 @@ public class NaturePower extends Power implements IdlePower, Removeable {
             @Override
             public void run() {
                 if (!p.isOnline()) { cancel(); return; }
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
-                        Particle.CHERRY_LEAVES, 6, 0.4, 0.5, 0.4, 0.6);
+                if (isAuraEnabled(p))
+                    particleApi.spawnParticles(p.getLocation().clone().add(0, 0.1, 0),
+                            Particle.CHERRY_LEAVES, 2, 0.4, 0.02, 0.4, 0.1);
                 if (inNatureBiome(p)) {
                     if (t % 4 == 0) {
                         double hp = p.getHealth();
-                        if (hp < p.getMaxHealth())
-                            p.setHealth(Math.min(p.getMaxHealth(), hp + 1.0));
+                        if (hp < getMaxHp(p))
+                            p.setHealth(Math.min(getMaxHp(p), hp + 1.0));
                     }
                     p.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 25, 0, false, false));
-                    particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 0.5, 0),
-                            GREENS[t % GREENS.length], 0.9f, 3, 0.35, 0.3, 0.35);
+                    if (isAuraEnabled(p))
+                        particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 0.5, 0),
+                                GREENS[t % GREENS.length], 0.9f, 3, 0.35, 0.3, 0.35);
                 }
                 t++;
             }
@@ -540,14 +536,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
         }
     }
 
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false);
@@ -555,10 +543,6 @@ public class NaturePower extends Power implements IdlePower, Removeable {
             en.setSmall(true);
             en.setMarker(true);
         });
-    }
-
-    private void safeRemove(ArmorStand as) {
-        if (!as.isDead()) as.remove();
     }
 
     private void restoreBlocks(HashMap<Block, Material> blocks, long delayTicks) {

@@ -20,6 +20,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -59,7 +60,6 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
 
     public IceDragonPower(Player owner) { super(owner); }
 
-
     @Override
     public void executePower(Execute ex) {
         if (ex instanceof DamagedExecute)  { handleDamage((DamagedExecute) ex);         return; }
@@ -73,16 +73,15 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(id_roar,     p)) return; longRoar(p);      CooldownApi.addCooldown(id_roar,     p, cooldowns.get(id_roar));     return;
-            case 1: if (onCd(id_slash,    p)) return; iceSlash(p);      CooldownApi.addCooldown(id_slash,    p, cooldowns.get(id_slash));    return;
-            case 2: if (onCd(id_prison,   p)) return; hanNguyetTran(p); CooldownApi.addCooldown(id_prison,   p, cooldowns.get(id_prison));   return;
+            case 0: if (onCd(id_roar, p, this)) return; longRoar(p);      addCd(id_roar, p);     return;
+            case 1: if (onCd(id_slash, p, this)) return; iceSlash(p);      addCd(id_slash, p);    return;
+            case 2: if (onCd(id_prison, p, this)) return; hanNguyetTran(p); addCd(id_prison, p);   return;
             case 3: if (charging) return;
-                    if (onCd(id_charge,   p)) return; bangHaXung(p);                                                                          return;
-            case 4: if (onCd(id_blizzard, p)) return; tuyetVu(p);       CooldownApi.addCooldown(id_blizzard, p, cooldowns.get(id_blizzard)); return;
-            case 5: if (onCd(id_heaven,   p)) return; thienHan(p);      CooldownApi.addCooldown(id_heaven,   p, cooldowns.get(id_heaven));
+                    if (onCd(id_charge, p, this)) return; bangHaXung(p);                                                                          return;
+            case 4: if (onCd(id_blizzard, p, this)) return; tuyetVu(p);       addCd(id_blizzard, p); return;
+            case 5: if (onCd(id_heaven, p, this)) return; thienHan(p);      addCd(id_heaven, p);
         }
     }
-
 
     private void longRoar(Player p) {
         Location loc = p.getLocation().clone().add(0, 1, 0);
@@ -142,7 +141,6 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskLater(magicPlugin, 4L);
     }
-
 
     private void iceSlash(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 0.5f);
@@ -281,7 +279,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
                 if (t > 16 || p.isOnGround() && t > 3) {
                     chargeImpact(p.getLocation(), p, changed, r);
                     charging = false;
-                    CooldownApi.addCooldown(id_charge, p, cooldowns.get(id_charge));
+                    addCd(id_charge, p);
                     cancel(); return;
                 }
 
@@ -394,7 +392,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
                 if (t % 2 == 0) {
                     for (int i = 0; i < 4; i++) {
                         Location snow = center.clone().add(
-                                (r.nextDouble()-0.5)*8, 2 + r.nextDouble()*2, (r.nextDouble()-0.5)*8);
+                                (r.nextDouble()-0.5)*8, 2 + r.nextDouble()*0.25, (r.nextDouble()-0.5)*8);
                         particleApi.spawnParticles(snow, Particle.SNOWFLAKE, 2, 0.3, 0.3, 0.3, 0.1);
                         particleApi.spawnColoredParticles(snow, C_ICE_WHITE, 0.85f, 1, 0.1, 0.1, 0.1);
                     }
@@ -513,7 +511,6 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         }.runTaskLater(magicPlugin, 3L);
     }
 
-
     private void applyLongWeiArmorBreak(DealDamageExecute ex) {
         EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) ex.getRawEvent();
         Entity victim = event.getEntity();
@@ -522,17 +519,14 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         event.setDamage(event.getDamage() * 1.11);
     }
 
-
     private void longWeiArmorReduction(DamagedByExecute ex) {
     }
-
 
     private void handleDamage(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
         if (event.getCause() == EntityDamageEvent.DamageCause.FREEZE)
             event.setCancelled(true);
     }
-
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
@@ -544,18 +538,20 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { cancel(); return; }
 
                 if (p.getFreezeTicks() > 0) p.setFreezeTicks(0);
-                for (int i = 0; i < 10; i++) {
-                    double a1 = Math.toRadians(i * 36 + t * 8);
-                    double a2 = Math.toRadians(i * 36 - t * 11);
-                    Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.1, 1.1 + Math.sin(a1*0.5)*0.18, Math.sin(a1)*1.1);
-                    Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.8 + Math.sin(a2*0.5)*0.14, Math.sin(a2)*0.65);
-                    particleApi.spawnColoredParticles(lp1, AURA_COLORS[i % AURA_COLORS.length], 0.95f, 1, 0.03, 0.03, 0.03);
-                    particleApi.spawnColoredParticles(lp2, i%2==0 ? C_ICE_BLUE : C_ICE_CRYSTAL, 0.85f, 1, 0.03, 0.03, 0.03);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 10; i++) {
+                        double a1 = Math.toRadians(i * 36 + t * 8);
+                        double a2 = Math.toRadians(i * 36 - t * 11);
+                        Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.1, 0.12 + Math.sin(a1*0.5)*0.05, Math.sin(a1)*1.1);
+                        Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.06 + Math.sin(a2*0.5)*0.04, Math.sin(a2)*0.65);
+                        particleApi.spawnColoredParticles(lp1, AURA_COLORS[i % AURA_COLORS.length], 0.95f, 1, 0.03, 0.03, 0.03);
+                        particleApi.spawnColoredParticles(lp2, i%2==0 ? C_ICE_BLUE : C_ICE_CRYSTAL, 0.85f, 1, 0.03, 0.03, 0.03);
+                    }
+                    if (t % 3 == 0)
+                        particleApi.spawnParticles(
+                                p.getLocation().clone().add((r.nextDouble()-0.5)*1.2, r.nextDouble()*2, (r.nextDouble()-0.5)*1.2),
+                                Particle.SNOWFLAKE, 1, 0.04, 0.04, 0.04, 0.05);
                 }
-                if (t % 3 == 0)
-                    particleApi.spawnParticles(
-                            p.getLocation().clone().add((r.nextDouble()-0.5)*1.2, r.nextDouble()*2, (r.nextDouble()-0.5)*1.2),
-                            Particle.SNOWFLAKE, 1, 0.04, 0.04, 0.04, 0.05);
 
                 Set<UUID> currentInRange = new HashSet<>();
                 for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), 6, 6, 6)) {
@@ -572,7 +568,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
 
                     applyLongWei(le);
                     le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 22, 0, false, false));
-                    if (t % 2 == 0)
+                    if (t % 2 == 0 && isAuraEnabled(p))
                         particleApi.spawnColoredParticles(le.getLocation().clone().add(0, 1, 0),
                                 C_ICE_CRYSTAL, 0.75f, 1, 0.25, 0.4, 0.25);
                 }
@@ -592,7 +588,6 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         task.runTaskTimer(magicPlugin, 0, 20);
         return task;
     }
-
 
     @Override
     public void remove() {
@@ -618,22 +613,11 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
-
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
 
     private Location getRaycastGround(Player p, int maxDist) {
         Location cur = p.getEyeLocation().clone();
@@ -647,21 +631,10 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         return cur;
     }
 
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null; double bestDist = radius;
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity)) continue;
-            double d = e.getLocation().distance(p.getLocation());
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
-    }
-
     private Vector yawRotate(Vector v, double deg) {
         double r = Math.toRadians(deg);
         return new Vector(v.getX()*Math.cos(r)+v.getZ()*Math.sin(r), v.getY(), -v.getX()*Math.sin(r)+v.getZ()*Math.cos(r));
     }
-
 
     private static final String LW_META_HP = "lw_hp_base";
     private static final String LW_META_AR = "lw_ar_base";

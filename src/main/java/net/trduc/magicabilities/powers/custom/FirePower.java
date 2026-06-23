@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -62,47 +63,45 @@ public class FirePower extends Power implements IdlePower, Removeable {
         }
     }
 
-
     private void executeLeftClick(LeftClickExecute execute) {
         final Player p = execute.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
 
         switch (slot) {
             case 0:
-                if (onCd(fire_blast, p)) return;
+                if (onCd(fire_blast, p, this)) return;
                 p.getWorld().playSound(p.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1f, 1.5f);
                 fireBlast(p, 1.0, 0);
-                CooldownApi.addCooldown(fire_blast, p, cooldowns.get(fire_blast));
+                addCd(fire_blast, p);
                 return;
 
             case 1:
-                if (onCd(fire_barrage, p)) return;
+                if (onCd(fire_barrage, p, this)) return;
                 p.getWorld().playSound(p.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1f, 1.2f);
                 infernoBarrage(p);
-                CooldownApi.addCooldown(fire_barrage, p, cooldowns.get(fire_barrage));
+                addCd(fire_barrage, p);
                 return;
 
             case 2:
-                if (onCd(fire_surge, p)) return;
+                if (onCd(fire_surge, p, this)) return;
                 p.getWorld().playSound(p.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1f, 0.9f);
                 flameSurge(p);
-                CooldownApi.addCooldown(fire_surge, p, cooldowns.get(fire_surge));
+                addCd(fire_surge, p);
                 return;
 
             case 3:
-                if (onCd(divine_flame, p)) return;
+                if (onCd(divine_flame, p, this)) return;
                 divineFlame(p);
-                CooldownApi.addCooldown(divine_flame, p, cooldowns.get(divine_flame));
+                addCd(divine_flame, p);
                 return;
 
             case 4:
-                if (onCd(fire_meteor, p)) return;
+                if (onCd(fire_meteor, p, this)) return;
                 meteorStrike(p);
-                CooldownApi.addCooldown(fire_meteor, p, cooldowns.get(fire_meteor));
+                addCd(fire_meteor, p);
                 return;
         }
     }
-
 
     private void executeRightClick(RightClickExecute execute) {
         final Player p = execute.getPlayer();
@@ -110,26 +109,24 @@ public class FirePower extends Power implements IdlePower, Removeable {
         if (slot != 5) return;
 
         if (shieldActive) return;
-        if (onCd(fire_shield, p)) return;
+        if (onCd(fire_shield, p, this)) return;
 
         emberShield(p, false);
-        CooldownApi.addCooldown(fire_shield, p, cooldowns.get(fire_shield));
+        addCd(fire_shield, p);
     }
-
 
     private void executeSneak(SneakExecute execute) {
         final Player p = execute.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         if (slot != 6) return;
 
-        if (onCd(fire_dash, p)) return;
+        if (onCd(fire_dash, p, this)) return;
         combustionDash(p);
-        CooldownApi.addCooldown(fire_dash, p, cooldowns.get(fire_dash));
+        addCd(fire_dash, p);
     }
 
-
     private void fireBlast(Player p, double damageMult, int yawOffset) {
-        ArmorStand as = spawnProjectileArmorStand(p);
+        ArmorStand as = spawnProjectile(p);
         Vector dir = rotateVector(p.getEyeLocation().getDirection().clone(), yawOffset).normalize();
 
         Color[] colors = {Color.fromRGB(255, 72, 5), Color.fromRGB(255, 119, 0), Color.fromRGB(255, 210, 0)};
@@ -164,9 +161,8 @@ public class FirePower extends Power implements IdlePower, Removeable {
     }
 
     private void explodeFireBlast(Location loc, Player p, double radius, double damage) {
-        particleApi.spawnParticles(loc, Particle.FLAME, 120, 0.4, 0.4, 0.4, 0.4);
-        particleApi.spawnParticles(loc, Particle.LAVA, 20, 0.3, 0.3, 0.3, 0.1);
-        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 200, 0), 1.5f, 30, 0.3, 0.3, 0.3);
+        particleApi.spawnParticles(loc, Particle.FLAME, 30, 0.5, 0.5, 0.5, 0.15);
+        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 200, 0), 1.5f, 20, 0.4, 0.4, 0.4);
 
         spawnFireRing(loc, (int) radius);
 
@@ -181,7 +177,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
             }
         }
     }
-
 
     private void infernoBarrage(Player p) {
         int bolts = 7;
@@ -203,10 +198,9 @@ public class FirePower extends Power implements IdlePower, Removeable {
         }.runTaskLater(magicPlugin, 5L);
     }
 
-
     private void flameSurge(Player p) {
         Vector dir = p.getLocation().getDirection().clone().setY(0.15).normalize();
-        ArmorStand as = spawnProjectileArmorStand(p);
+        ArmorStand as = spawnProjectile(p);
         HashMap<Block, Material> oldBlocks = new HashMap<>();
         Random r = new Random();
 
@@ -299,7 +293,7 @@ public class FirePower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1f, 1.1f);
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1f, 2f);
 
-        ArmorStand orb = spawnProjectileArmorStand(p);
+        ArmorStand orb = spawnProjectile(p);
         Vector dir = p.getEyeLocation().getDirection().normalize();
         Color[] orbColors = {Color.fromRGB(255, 60, 0), Color.fromRGB(255, 140, 0), Color.fromRGB(255, 255, 0)};
         Random r = new Random();
@@ -341,9 +335,8 @@ public class FirePower extends Power implements IdlePower, Removeable {
     }
 
     private void divineExplosion(Location loc, Player p) {
-        particleApi.spawnParticles(loc, Particle.FLAME, 500, 1.5, 1.5, 1.5, 0.6);
-        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 220, 0), 2f, 100, 1, 1, 1);
-        particleApi.spawnParticles(loc, Particle.LAVA, 25, 1, 1, 1, 0.2);
+        particleApi.spawnParticles(loc, Particle.FLAME, 50, 1.5, 1.5, 1.5, 0.2);
+        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 220, 0), 2f, 40, 1, 1, 1);
 
         spawnFireRing(loc, 8);
 
@@ -363,7 +356,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
             }
         }
     }
-
 
     private void meteorStrike(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_WARDEN_SONIC_CHARGE, 1f, 0.6f);
@@ -426,9 +418,8 @@ public class FirePower extends Power implements IdlePower, Removeable {
     }
 
     private void meteorImpact(Location loc, Player p) {
-        particleApi.spawnParticles(loc, Particle.FLAME, 200, 1.0, 1.0, 1.0, 0.5);
-        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 180, 0), 2f, 60, 0.8, 0.8, 0.8);
-        particleApi.spawnParticles(loc, Particle.LAVA, 30, 0.5, 0.5, 0.5, 0.1);
+        particleApi.spawnParticles(loc, Particle.FLAME, 40, 1.0, 1.0, 1.0, 0.15);
+        particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 180, 0), 2f, 30, 0.8, 0.8, 0.8);
         spawnFireRing(loc, 4);
 
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.9f, 1.1f);
@@ -444,7 +435,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
             }
         }
     }
-
 
     private void emberShield(Player p, boolean mini) {
         if (shieldActive && !mini) return;
@@ -503,7 +493,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
         shieldRunnable.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void combustionDash(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1f, 0.5f);
 
@@ -543,7 +532,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void flameRetaliation(DamagedByExecute ex) {
         Player p = ex.getPlayer();
         if (CooldownApi.isOnCooldown(fire_retaliation, p)) return;
@@ -560,9 +548,8 @@ public class FirePower extends Power implements IdlePower, Removeable {
 
         if (!shieldActive) emberShield(p, true);
 
-        CooldownApi.addCooldown(fire_retaliation, p, 4.0);
+        addCdFixed(fire_retaliation, p, 4.0);
     }
-
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
@@ -573,16 +560,17 @@ public class FirePower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { cancel(); return; }
                 if (p.getFireTicks() > 0) p.setFireTicks(0);
                 p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 25, 0, false, false));
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
-                        Particle.FLAME, 6, 0.35, 0.45, 0.35, 0.02);
-                particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 0.5, 0),
-                        Color.fromRGB(255, 140, 0), 0.8f, 2, 0.2, 0.2, 0.2);
+                if (isAuraEnabled(p)) {
+                    particleApi.spawnParticles(p.getLocation().clone().add(0, 0.1, 0),
+                            Particle.FLAME, 2, 0.3, 0.02, 0.3, 0.01);
+                    particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 0.08, 0),
+                            Color.fromRGB(255, 140, 0), 0.8f, 1, 0.25, 0.01, 0.25);
+                }
             }
         };
         r.runTaskTimer(magicPlugin, 0, 20);
         return r;
     }
-
 
     @Override
     public void remove() {
@@ -605,34 +593,6 @@ public class FirePower extends Power implements IdlePower, Removeable {
             case 6: return "&cCombustion Dash";
             default: return "&7none";
         }
-    }
-
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
-    private ArmorStand spawnProjectileArmorStand(Player p) {
-        return p.getWorld().spawn(p.getEyeLocation().clone(), ArmorStand.class, en -> {
-            en.setVisible(false);
-            en.setGravity(false);
-            en.setSmall(true);
-            en.setMarker(true);
-        });
-    }
-
-    private void safeRemove(ArmorStand as) {
-        if (!as.isDead()) as.remove();
-    }
-
-    private Location getGroundBelow(Location loc) {
-        Location g = loc.clone();
-        while (g.getBlock().isPassable() && !g.getBlock().isLiquid() && g.getY() > 0) g.add(0, -1, 0);
-        return g.add(0, 1, 0);
     }
 
     private void spawnFireRing(Location center, int radius) {

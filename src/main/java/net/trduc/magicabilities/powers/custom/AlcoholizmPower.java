@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Random;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 
 public class AlcoholizmPower extends Power implements IdlePower {
     private boolean drunk = false;

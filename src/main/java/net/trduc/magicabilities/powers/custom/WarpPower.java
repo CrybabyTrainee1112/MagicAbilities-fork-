@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -54,7 +55,7 @@ public class WarpPower extends Power implements IdlePower {
                 notifyPlayers(p, pl, getDest().clone().add(0, 1, 0));
                 openRift(pl, getDest().clone().add(0, 1, 0), tpEd, 15);
                 openRift(getDest().clone().add(0, 1, 0), pl, tpEd, 15);
-                CooldownApi.addCooldown(warp_default, p, cooldowns.get(warp_default));
+                addCd(warp_default, p);
                 return;
         }
     }
@@ -147,8 +148,9 @@ public class WarpPower extends Power implements IdlePower {
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 0.6, 0),
-                        Particle.PORTAL, 10, 0.3, 0.3, 0.3, 0.1);
+                particleApi.spawnColoredParticles(
+                        p.getLocation().clone().add(0, 0.06, 0),
+                        Color.fromRGB(120, 0, 200), 1.0f, 1, 0.3, 0.01, 0.3);
             }
         };
         r.runTaskTimer(magicPlugin, 0, 10);

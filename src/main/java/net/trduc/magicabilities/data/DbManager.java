@@ -26,12 +26,13 @@ public class DbManager {
             Class.forName("org.sqlite.JDBC");
             this.conn = DriverManager.getConnection("jdbc:sqlite:plugins/"+plugin.getDataFolder().getName()+"/data.db");
             Statement stmt = conn.createStatement();
-            String sql = "create table if not exists powers (name TEXT PRIMARY KEY NOT NULL, power TEXT NOT NULL, enabled BOOLEAN NOT NULL);";
+            String sql = "create table if not exists powers (name TEXT PRIMARY KEY NOT NULL, power TEXT NOT NULL, enabled BOOLEAN NOT NULL, aura_enabled BOOLEAN NOT NULL DEFAULT 1);";
             stmt.execute(sql);
             String sql2 = "create table if not exists binds (name TEXT PRIMARY KEY NOT NULL," +
                     " ab0 INT NOT NULL, ab1 INT NOT NULL, ab2 INT NOT NULL, ab3 INT NOT NULL, ab4 INT NOT NULL, ab5 INT NOT NULL," +
                     " ab6 INT NOT NULL, ab7 INT NOT NULL, ab8 INT NOT NULL);";
             stmt.execute(sql2);
+            migrateAuraColumn(stmt);
             stmt.close();
             conn.close();
             return true;
@@ -39,6 +40,20 @@ public class DbManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void migrateAuraColumn(Statement stmt) {
+        
+        try {
+            ResultSet rs = stmt.executeQuery("select aura_enabled from powers limit 1;");
+            rs.close();
+        } catch (Exception e) {
+            try {
+                stmt.execute("alter table powers add column aura_enabled BOOLEAN NOT NULL DEFAULT 1;");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     public boolean isDbEnabled(){
@@ -72,8 +87,8 @@ public class DbManager {
         try{
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection("jdbc:sqlite:plugins/"+plugin.getDataFolder().getName()+"/data.db");
-            String insert = "insert into powers (name, power, enabled) values" +
-                    " (?, ?, 1);";
+            String insert = "insert into powers (name, power, enabled, aura_enabled) values" +
+                    " (?, ?, 1, 1);";
             String insert2 = "insert into binds (name, ab0, ab1, ab2, ab3, ab4, ab5, ab6, ab7, ab8) values" +
                     " (?, 0, 1, 2, 3, 4, 5, 6, 7, 8);";
 
@@ -111,7 +126,7 @@ public class DbManager {
             for (int i = 0; i<9; i++){
                 binds.put(i, rs2.getInt("ab"+i));
             }
-            pd = new PlayerData(playerName, PowerType.valueOf(rs.getString("power")), binds, rs.getBoolean("enabled"));
+            pd = new PlayerData(playerName, PowerType.valueOf(rs.getString("power")), binds, rs.getBoolean("enabled"), rs.getBoolean("aura_enabled"));
 
             stmt.close();
             stmt2.close();
@@ -127,11 +142,12 @@ public class DbManager {
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection("jdbc:sqlite:plugins/"+plugin.getDataFolder().getName()+"/data.db");
 
-            String update = "update powers set power=?, enabled=? where name=?;";
+            String update = "update powers set power=?, enabled=?, aura_enabled=? where name=?;";
             PreparedStatement stmt = conn.prepareStatement(update);
             stmt.setString(1, pd.getPower().toString());
             stmt.setBoolean(2, pd.isEnabled());
-            stmt.setString(3, name);
+            stmt.setBoolean(3, pd.isAuraEnabled());
+            stmt.setString(4, name);
             stmt.execute();
             stmt.close();
 

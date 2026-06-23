@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -62,15 +63,15 @@ public class WaterPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(w_bolt,    p)) return; tidalBolt(p);    CooldownApi.addCooldown(w_bolt,    p, cooldowns.get(w_bolt));    return;
-            case 1: if (onCd(w_whirl,   p)) return; whirlpool(p);    CooldownApi.addCooldown(w_whirl,   p, cooldowns.get(w_whirl));   return;
-            case 2: if (onCd(w_wave,    p)) return; waveCrash(p);    CooldownApi.addCooldown(w_wave,    p, cooldowns.get(w_wave));    return;
+            case 0: if (onCd(w_bolt, p, this)) return; tidalBolt(p);    addCd(w_bolt, p);    return;
+            case 1: if (onCd(w_whirl, p, this)) return; whirlpool(p);    addCd(w_whirl, p);   return;
+            case 2: if (onCd(w_wave, p, this)) return; waveCrash(p);    addCd(w_wave, p);    return;
             case 3: if (dashing) return;
-                    if (onCd(w_dash,    p)) return; aquaDash(p);                                                                       return;
-            case 4: if (onCd(w_tsunami, p)) return; tsunami(p);      CooldownApi.addCooldown(w_tsunami, p, cooldowns.get(w_tsunami)); return;
-            case 5: if (onCd(w_bubble,  p)) return; bubblePrison(p); CooldownApi.addCooldown(w_bubble,  p, cooldowns.get(w_bubble)); return;
+                    if (onCd(w_dash, p, this)) return; aquaDash(p);                                                                       return;
+            case 4: if (onCd(w_tsunami, p, this)) return; tsunami(p);      addCd(w_tsunami, p); return;
+            case 5: if (onCd(w_bubble, p, this)) return; bubblePrison(p); addCd(w_bubble, p); return;
             case 6: if (hydroActive) return;
-                    if (onCd(w_hydro, p))    return; hydroForm(p);    CooldownApi.addCooldown(w_hydro,   p, cooldowns.get(w_hydro));
+                    if (onCd(w_hydro, p, this))    return; hydroForm(p);    addCd(w_hydro, p);
         }
     }
 
@@ -256,7 +257,7 @@ public class WaterPower extends Power implements IdlePower, Removeable {
             spawnWaterZone(tl, p);
         }
 
-        CooldownApi.addCooldown(w_dash, p, cooldowns.get(w_dash));
+        addCd(w_dash, p);
         new BukkitRunnable() { @Override public void run() { dashing = false; } }.runTaskLater(magicPlugin, 5L);
     }
 
@@ -336,7 +337,7 @@ public class WaterPower extends Power implements IdlePower, Removeable {
     private void bubblePrison(Player p) {
         LivingEntity target = getNearestTarget(p, 7);
         if (target == null) {
-            p.sendMessage(ChatColor.AQUA + "Không có mục tiêu trong tầm 7 block!"); return;
+            p.sendMessage(ChatColor.AQUA + "No target in sight 7 block!"); return;
         }
 
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_SPLASH, 0.9f, 1.8f);
@@ -513,7 +514,7 @@ public class WaterPower extends Power implements IdlePower, Removeable {
         Vector kb = damager.getLocation().subtract(p.getLocation()).toVector().normalize().multiply(1.3).setY(0.3);
         damager.setVelocity(kb);
 
-        CooldownApi.addCooldown(w_counter, p, cooldowns.get(w_counter));
+        addCd(w_counter, p);
     }
 
     private void handleDamage(DamagedExecute ex) {
@@ -541,14 +542,16 @@ public class WaterPower extends Power implements IdlePower, Removeable {
                 for (int i = 0; i < 10; i++) {
                     double a1 = Math.toRadians(i * 36 + t * 8);
                     double a2 = Math.toRadians(i * 36 - t * 11);
-                    Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.05, 1.1 + Math.sin(a1*0.5)*0.18, Math.sin(a1)*1.05);
-                    Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.8 + Math.sin(a2*0.5)*0.14, Math.sin(a2)*0.65);
-                    particleApi.spawnColoredParticles(lp1, AURA_COLS[i % AURA_COLS.length], 0.9f, 1, 0.03, 0.03, 0.03);
-                    particleApi.spawnColoredParticles(lp2, i%2==0 ? C_AQUA : C_BUBBLE,      0.8f, 1, 0.03, 0.03, 0.03);
+                    Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.05, 0.12 + Math.sin(a1*0.5)*0.06, Math.sin(a1)*1.05);
+                    Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.06 + Math.sin(a2*0.5)*0.05, Math.sin(a2)*0.65);
+                    if (isAuraEnabled(p)) {
+                        particleApi.spawnColoredParticles(lp1, AURA_COLS[i % AURA_COLS.length], 0.9f, 1, 0.03, 0.03, 0.03);
+                        particleApi.spawnColoredParticles(lp2, i%2==0 ? C_AQUA : C_BUBBLE,      0.8f, 1, 0.03, 0.03, 0.03);
+                    }
                 }
-                if (t % 4 == 0)
+                if (t % 4 == 0 && isAuraEnabled(p))
                     particleApi.spawnParticles(p.getLocation().clone().add(
-                            (r.nextDouble()-0.5)*1.4, r.nextDouble()*2.2, (r.nextDouble()-0.5)*1.4),
+                            (r.nextDouble()-0.5)*1.4, r.nextDouble()*0.3, (r.nextDouble()-0.5)*1.4),
                             Particle.DRIPPING_WATER, 1, 0.04, 0.04, 0.04, 0.04);
 
                 t++;
@@ -557,7 +560,6 @@ public class WaterPower extends Power implements IdlePower, Removeable {
         task.runTaskTimer(magicPlugin, 0, 20);
         return task;
     }
-
 
     @Override
     public void remove() {
@@ -579,21 +581,11 @@ public class WaterPower extends Power implements IdlePower, Removeable {
         }
     }
 
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
-
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
 
     private void drawWaterTrail(Location from, Location to) {
         new BukkitRunnable() {
@@ -626,17 +618,6 @@ public class WaterPower extends Power implements IdlePower, Removeable {
             }
         }
         return cur;
-    }
-
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null;
-        double bestDist = radius;
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity)) continue;
-            double d = e.getLocation().distance(p.getLocation());
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
     }
 
     private Vector yawRotate(Vector v, double deg) {

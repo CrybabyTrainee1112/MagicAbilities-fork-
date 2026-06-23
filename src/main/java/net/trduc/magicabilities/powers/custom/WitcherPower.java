@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -82,11 +83,11 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(witcher_igni,  p)) return; igni(p);  CooldownApi.addCooldown(witcher_igni,  p, igniCharged ? cooldowns.get(witcher_igni)*1.6 : cooldowns.get(witcher_igni)); igniCharged=false; return;
-            case 1: if (onCd(witcher_aard,  p)) return; aard(p);  CooldownApi.addCooldown(witcher_aard,  p, cooldowns.get(witcher_aard));  return;
-            case 2: if (shield) return; if (onCd(witcher_quen, p)) return; quen(p); return;
-            case 3: if (onCd(witcher_axii,  p)) return; axii(p);  CooldownApi.addCooldown(witcher_axii,  p, cooldowns.get(witcher_axii));  return;
-            case 4: if (onCd(witcher_yrden, p)) return; yrden(p); CooldownApi.addCooldown(witcher_yrden, p, cooldowns.get(witcher_yrden));
+            case 0: if (onCd(witcher_igni, p, this)) return; igni(p);  addCd(witcher_igni, p, igniCharged ? 1.6 : 1.0); igniCharged=false; return;
+            case 1: if (onCd(witcher_aard, p, this)) return; aard(p);  addCd(witcher_aard, p);  return;
+            case 2: if (shield) return; if (onCd(witcher_quen, p, this)) return; quen(p); return;
+            case 3: if (onCd(witcher_axii, p, this)) return; axii(p);  addCd(witcher_axii, p);  return;
+            case 4: if (onCd(witcher_yrden, p, this)) return; yrden(p); addCd(witcher_yrden, p);
         }
     }
 
@@ -326,7 +327,7 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
                 }
                 if (t > 300) {
                     shield = false; quenCleanup();
-                    CooldownApi.addCooldown(witcher_quen, p, cooldowns.get(witcher_quen));
+                    addCd(witcher_quen, p);
                     p.sendMessage(ChatColor.YELLOW + "Quen expired.");
                     cancel();
                 }
@@ -357,7 +358,7 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
 
     private void quenShatter(Player p) {
         shield = false; quenCleanup();
-        CooldownApi.addCooldown(witcher_quen, p, cooldowns.get(witcher_quen));
+        addCd(witcher_quen, p);
         p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "✦ Quen shattered — retaliation!");
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_ANVIL_LAND, 1f, 2f);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.6f);
@@ -378,7 +379,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
     }
 
     private void quenCleanup() { if (quenRunnable != null) { quenRunnable.cancel(); quenRunnable = null; } }
-
 
     private void axii(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 1f, 0.7f);
@@ -478,7 +478,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void witcherParry(DamagedByExecute ex) {
         if (new Random().nextInt(10) >= 4) return;
         Player p = ex.getPlayer();
@@ -494,7 +493,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         Entity damager = event.getDamager();
         if (damager instanceof LivingEntity) ((LivingEntity) damager).damage(6, p);
     }
-
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
@@ -517,7 +515,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         return r;
     }
 
-
     @Override
     public void remove() {
         quenCleanup();
@@ -526,7 +523,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         axiiMarked.clear();
         yrdenTraps.clear();
     }
-
 
     @Override
     public String getAbilityName(int ability) {
@@ -540,22 +536,11 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
-
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
 
     private Vector rotateVec(Vector v, double yawDeg, double pitchDeg) {
         double y = Math.toRadians(yawDeg);
@@ -616,21 +601,6 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         particleApi.spawnColoredParticles(loc.clone().add(0, 1, 0), c, 1.8f, 50, 0.6, 0.8, 0.6);
         particleApi.spawnColoredParticles(loc.clone().add(0, 1, 0), AXII_GREEN, 1.2f, 20, 0.4, 0.4, 0.4);
         loc.getWorld().playSound(loc, Sound.ENTITY_EVOKER_CAST_SPELL, 0.8f, 1.6f);
-    }
-
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null;
-        double bestScore = Double.MAX_VALUE;
-        Vector fwd = p.getEyeLocation().getDirection().clone().normalize();
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity) || e instanceof Player) continue;
-            double dist = e.getLocation().distance(p.getLocation());
-            Vector toE  = e.getLocation().subtract(p.getLocation()).toVector().normalize();
-            double angle = fwd.angle(toE);
-            double score = dist + angle * 4;
-            if (score < bestScore) { bestScore = score; best = (LivingEntity) e; }
-        }
-        return best;
     }
 
     private void drawBeam(Location from, Location to, Color color) {

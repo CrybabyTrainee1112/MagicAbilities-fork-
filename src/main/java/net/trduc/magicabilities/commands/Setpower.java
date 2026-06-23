@@ -66,7 +66,7 @@ public class Setpower implements CommandExecutor, TabCompleter {
                         continue;
                     }
                     finalType = RandomPowerAssigner.randomPower();
-                    target.sendMessage(ChatColor.GOLD + "✦ Bạn đã nhận được sức mạnh ngẫu nhiên: "
+                    target.sendMessage(ChatColor.GOLD + "✦ You have received a random power: "
                             + ChatColor.YELLOW + ChatColor.BOLD + finalType.name().replace('_', ' '));
                 }
                 players.get(target).changePower(finalType);

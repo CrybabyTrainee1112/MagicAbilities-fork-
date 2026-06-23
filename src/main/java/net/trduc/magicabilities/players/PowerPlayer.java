@@ -19,11 +19,13 @@ public class PowerPlayer {
     private int activeSlot;
     private BukkitRunnable idlePower = null;
     private final HashMap<Integer, Integer> binds;
+    private boolean auraEnabled;
 
-    public PowerPlayer(Power power, HashMap<Integer, Integer> binds, boolean enabled) {
+    public PowerPlayer(Power power, HashMap<Integer, Integer> binds, boolean enabled, boolean auraEnabled) {
         this.power = power;
         this.activeSlot=this.power.getOwner().getInventory().getHeldItemSlot();
         this.binds = binds;
+        this.auraEnabled = auraEnabled;
         if (players.containsKey(power.getOwner())){
             throw new RuntimeException("Power players Hashmap already has this Player!");
         }
@@ -79,5 +81,13 @@ public class PowerPlayer {
 
     public HashMap<Integer, Integer> getBinds() {
         return binds;
+    }
+
+    public boolean isAuraEnabled() {
+        return auraEnabled;
+    }
+
+    public void setAuraEnabled(boolean auraEnabled) {
+        this.auraEnabled = auraEnabled;
     }
 }

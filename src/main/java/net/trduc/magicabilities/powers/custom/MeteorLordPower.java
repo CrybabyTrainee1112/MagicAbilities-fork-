@@ -20,6 +20,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -67,20 +68,19 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(mt_shot,    p)) return; meteorShot(p);    CooldownApi.addCooldown(mt_shot,    p, cooldowns.get(mt_shot));    return;
-            case 1: if (onCd(mt_rain,    p)) return; meteorRain(p);    CooldownApi.addCooldown(mt_rain,    p, cooldowns.get(mt_rain));    return;
-            case 2: if (onCd(mt_slam,    p)) return; impactSlam(p);    CooldownApi.addCooldown(mt_slam,    p, cooldowns.get(mt_slam));    return;
-            case 3: if (onCd(mt_gravity, p)) return; gravityPull(p);   CooldownApi.addCooldown(mt_gravity, p, cooldowns.get(mt_gravity)); return;
+            case 0: if (onCd(mt_shot, p, this)) return; meteorShot(p);    addCd(mt_shot, p);    return;
+            case 1: if (onCd(mt_rain, p, this)) return; meteorRain(p);    addCd(mt_rain, p);    return;
+            case 2: if (onCd(mt_slam, p, this)) return; impactSlam(p);    addCd(mt_slam, p);    return;
+            case 3: if (onCd(mt_gravity, p, this)) return; gravityPull(p);   addCd(mt_gravity, p); return;
             case 4:
-                if (armorActive) { p.sendMessage(org.bukkit.ChatColor.GOLD + "Meteor Armor đang active!"); return; }
-                if (onCd(mt_armor, p)) return;
+                if (armorActive) { p.sendMessage(org.bukkit.ChatColor.GOLD + "Meteor Armor is already active!"); return; }
+                if (onCd(mt_armor, p, this)) return;
                 meteorArmor(p);
-                CooldownApi.addCooldown(mt_armor, p, cooldowns.get(mt_armor));
+                addCd(mt_armor, p);
                 return;
-            case 5: if (onCd(mt_extinct, p)) return; extinctionEvent(p); CooldownApi.addCooldown(mt_extinct, p, cooldowns.get(mt_extinct));
+            case 5: if (onCd(mt_extinct, p, this)) return; extinctionEvent(p); addCd(mt_extinct, p);
         }
     }
-
 
     private void meteorShot(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BLAZE_SHOOT,     1f, 0.6f);
@@ -133,7 +133,6 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskTimer(magicPlugin, 0, 1);
     }
-
 
     private void meteorRain(Player p) {
         Location center = getRaycast(p, 30);
@@ -212,7 +211,6 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
         ground.getWorld().playSound(ground, Sound.ENTITY_BLAZE_SHOOT, 0.7f, 0.55f);
     }
 
-
     private void impactSlam(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1f, 0.5f);
 
@@ -267,7 +265,6 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskLater(magicPlugin, 12L);
     }
-
 
     private void gravityPull(Player p) {
         Location center = p.getLocation().clone().add(0, 1, 0);
@@ -496,7 +493,6 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
         ground.getWorld().playSound(ground, Sound.ENTITY_BLAZE_SHOOT, 0.9f, 0.4f);
     }
 
-
     private void onDamaged(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
         Player p = ex.getPlayer();
@@ -540,40 +536,42 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
 
                 Location center = p.getLocation().clone().add(0, 1, 0);
 
-                for (int i = 0; i < 12; i++) {
-                    double a = Math.toRadians(i * 30 + t * 6);
-                    double yOsc = Math.sin(t * 0.08 + i * 0.5) * 0.3;
-                    Location lp = center.clone().add(Math.cos(a)*1.15, yOsc, Math.sin(a)*1.15);
-                    Color c = (t+i)%3==0 ? C_METEOR_ORG : (t+i)%3==1 ? C_EMBER : C_METEOR_RED;
-                    particleApi.spawnColoredParticles(lp, c, 1.1f, 1, 0.04, 0.04, 0.04);
-                    if (i % 3 == 0)
-                        particleApi.spawnParticles(lp, Particle.FLAME, 1, 0.04, 0.04, 0.04, 0.02);
-                }
-                for (int i = 0; i < 8; i++) {
-                    double a = Math.toRadians(i * 45 - t * 8);
-                    Location lp = center.clone().add(Math.cos(a)*0.7, 0.4+Math.sin(a*0.5)*0.2, Math.sin(a)*0.7);
-                    particleApi.spawnColoredParticles(lp, i%2==0 ? C_CORE_WHITE : C_HOT_YELLOW,
-                            0.9f, 1, 0.03, 0.03, 0.03);
-                }
-                if (t % 4 == 0) {
-                    for (int i = 0; i < 6; i++) {
-                        double a = Math.toRadians(i * 60 + t * 5);
-                        Location fp = p.getLocation().clone().add(Math.cos(a)*0.9, 0.05, Math.sin(a)*0.9);
-                        particleApi.spawnParticles(fp, Particle.LAVA, 1, 0.04, 0.01, 0.04, 0.02);
-                        particleApi.spawnColoredParticles(fp, C_EMBER, 0.85f, 1, 0.05, 0.01, 0.05);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 12; i++) {
+                        double a = Math.toRadians(i * 30 + t * 6);
+                        double yOsc = Math.sin(t * 0.08 + i * 0.5) * 0.3;
+                        Location lp = center.clone().add(Math.cos(a)*1.15, yOsc, Math.sin(a)*1.15);
+                        Color c = (t+i)%3==0 ? C_METEOR_ORG : (t+i)%3==1 ? C_EMBER : C_METEOR_RED;
+                        particleApi.spawnColoredParticles(lp, c, 1.1f, 1, 0.04, 0.04, 0.04);
+                        if (i % 3 == 0)
+                            particleApi.spawnParticles(lp, Particle.FLAME, 1, 0.04, 0.04, 0.04, 0.02);
                     }
+                    for (int i = 0; i < 8; i++) {
+                        double a = Math.toRadians(i * 45 - t * 8);
+                        Location lp = center.clone().add(Math.cos(a)*0.7, 0.4+Math.sin(a*0.5)*0.2, Math.sin(a)*0.7);
+                        particleApi.spawnColoredParticles(lp, i%2==0 ? C_CORE_WHITE : C_HOT_YELLOW,
+                                0.9f, 1, 0.03, 0.03, 0.03);
+                    }
+                    if (t % 4 == 0) {
+                        for (int i = 0; i < 6; i++) {
+                            double a = Math.toRadians(i * 60 + t * 5);
+                            Location fp = p.getLocation().clone().add(Math.cos(a)*0.9, 0.05, Math.sin(a)*0.9);
+                            particleApi.spawnParticles(fp, Particle.LAVA, 1, 0.04, 0.01, 0.04, 0.02);
+                            particleApi.spawnColoredParticles(fp, C_EMBER, 0.85f, 1, 0.05, 0.01, 0.05);
+                        }
+                    }
+                    if (t % 3 == 0)
+                        particleApi.spawnParticles(
+                            center.clone().add(
+                                (rng.nextDouble()-0.5)*1.3, rng.nextDouble()*1.6-0.2, (rng.nextDouble()-0.5)*1.3),
+                            Particle.FLAME, 1, 0.05, 0.05, 0.05, 0.03);
                 }
-                if (t % 3 == 0)
-                    particleApi.spawnParticles(
-                        center.clone().add(
-                            (rng.nextDouble()-0.5)*1.3, rng.nextDouble()*1.6-0.2, (rng.nextDouble()-0.5)*1.3),
-                        Particle.FLAME, 1, 0.05, 0.05, 0.05, 0.03);
                 if (t % 40 == 0 && !CooldownApi.isOnCooldown(mt_scorch, p)) {
                     for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), 1.5, 1.5, 1.5)) {
                         if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
                         e.setFireTicks(40);
                         ((LivingEntity) e).damage(1, p);
-                        CooldownApi.addCooldown(mt_scorch, p, cooldowns.get(mt_scorch));
+                        addCd(mt_scorch, p);
                     }
                 }
                 if (t % 80 == 0)
@@ -585,7 +583,6 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
         task.runTaskTimer(magicPlugin, 0, 20);
         return task;
     }
-
 
     @Override
     public void remove() {
@@ -670,10 +667,4 @@ public class MeteorLordPower extends Power implements IdlePower, Removeable {
         }
     }
 
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p)); return true;
-        }
-        return false;
-    }
 }

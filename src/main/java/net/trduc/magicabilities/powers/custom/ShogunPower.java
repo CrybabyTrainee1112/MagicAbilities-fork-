@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -66,7 +67,7 @@ public class ShogunPower extends Power implements IdlePower {
             return;
         };
         dash(player);
-        CooldownApi.addCooldown(shogun_dash, player, cooldowns.get(shogun_dash));
+        addCd(shogun_dash, player);
     }
 
     private void dash(Player p){
@@ -112,7 +113,7 @@ public class ShogunPower extends Power implements IdlePower {
         }
         p.setVelocity(p.getLocation().getDirection().clone().normalize().multiply(1.4).add(new Vector(0, 0.3, 0)));
         spawnParticles(p);
-        CooldownApi.addCooldown(shogun_double_jump, p, cooldowns.get(shogun_double_jump));
+        addCd(shogun_double_jump, p);
         return;
     }
 

@@ -36,8 +36,12 @@ public class DataEventsHandler implements Listener {
         if (event.getPlayer().getName().contains(" ")){
             event.getPlayer().kickPlayer("Invalid Name!");
         }
+        if (players.containsKey(event.getPlayer())) {
+            players.get(event.getPlayer()).remove();
+            players.remove(event.getPlayer());
+        }
         setPlayerDataFromDb(event.getPlayer(), dbManager);
-        new PowerPlayer(Power.getPowerFromPowerType(event.getPlayer(), getPlayerData(event.getPlayer()).getPower()), getPlayerData(event.getPlayer()).getBinds(), getPlayerData(event.getPlayer()).isEnabled());
+        new PowerPlayer(Power.getPowerFromPowerType(event.getPlayer(), getPlayerData(event.getPlayer()).getPower()), getPlayerData(event.getPlayer()).getBinds(), getPlayerData(event.getPlayer()).isEnabled(), getPlayerData(event.getPlayer()).isAuraEnabled());
 
         if (getPlayerData(event.getPlayer()).getPower() == PowerType.NONE) {
             PowerType assigned = RandomPowerAssigner.randomPower();
@@ -45,9 +49,9 @@ public class DataEventsHandler implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    event.getPlayer().sendMessage(ChatColor.GOLD + "✦ Chào mừng! Bạn đã nhận được sức mạnh: "
+                    event.getPlayer().sendMessage(ChatColor.GOLD + "✦ Welcome! You have received the power: "
                             + ChatColor.YELLOW + ChatColor.BOLD + assigned.name().replace('_', ' '));
-                    event.getPlayer().sendMessage(ChatColor.GRAY + "Dùng /powerset off để tắt sức mạnh khi không cần.");
+                    event.getPlayer().sendMessage(ChatColor.GRAY + "Use /powerset off to disable your power when not needed.");
                 }
             }.runTaskLater(magicPlugin, 20);
         } else {
@@ -65,7 +69,9 @@ public class DataEventsHandler implements Listener {
     public void onLeave(PlayerQuitEvent event){
         savePlayerDataToDb(event.getPlayer(), dbManager);
         removePlayerData(event.getPlayer());
-        players.get(event.getPlayer()).remove();
-        players.remove(event.getPlayer());
+        if (players.containsKey(event.getPlayer())) {
+            players.get(event.getPlayer()).remove();
+            players.remove(event.getPlayer());
+        }
     }
 }

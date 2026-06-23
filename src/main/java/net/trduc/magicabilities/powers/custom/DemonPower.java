@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -52,7 +53,6 @@ public class DemonPower extends Power implements IdlePower, Removeable {
 
     public DemonPower(Player owner) { super(owner); }
 
-
     @Override
     public void executePower(Execute ex) {
         if (ex instanceof DamagedByExecute) {
@@ -61,10 +61,8 @@ public class DemonPower extends Power implements IdlePower, Removeable {
                 drainRunnable = null;
                 draining = false;
                 ((DamagedByExecute) ex).getPlayer().sendMessage(
-                        ChatColor.DARK_RED + "Soul Drain bị hủy!");
-                CooldownApi.addCooldown(dm_drain,
-                        ((DamagedByExecute) ex).getPlayer(),
-                        cooldowns.get(dm_drain) * 0.5);
+                        ChatColor.DARK_RED + "Soul Drain cancelled!");
+                addCd(dm_drain, ((DamagedByExecute) ex).getPlayer(), 0.5);
             }
             shadowCounter((DamagedByExecute) ex);
             return;
@@ -81,14 +79,14 @@ public class DemonPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(dm_soulbolt, p)) return; soulBolt(p);    CooldownApi.addCooldown(dm_soulbolt, p, cooldowns.get(dm_soulbolt)); return;
-            case 1: if (onCd(dm_hellfire, p)) return; hellfireRain(p); CooldownApi.addCooldown(dm_hellfire, p, cooldowns.get(dm_hellfire)); return;
-            case 2: if (onCd(dm_cleave,   p)) return; shadowCleave(p); CooldownApi.addCooldown(dm_cleave,   p, cooldowns.get(dm_cleave));   return;
-            case 3: if (draining) { p.sendMessage(ChatColor.DARK_PURPLE + "Đang channel Soul Drain!"); return; }
-                    if (onCd(dm_drain, p)) return; soulDrain(p); return;
+            case 0: if (onCd(dm_soulbolt, p, this)) return; soulBolt(p);    addCd(dm_soulbolt, p); return;
+            case 1: if (onCd(dm_hellfire, p, this)) return; hellfireRain(p); addCd(dm_hellfire, p); return;
+            case 2: if (onCd(dm_cleave, p, this)) return; shadowCleave(p); addCd(dm_cleave, p);   return;
+            case 3: if (draining) { p.sendMessage(ChatColor.DARK_PURPLE + "Channeling Soul Drain!"); return; }
+                    if (onCd(dm_drain, p, this)) return; soulDrain(p); return;
             case 4: if (charging) return;
-                    if (onCd(dm_charge, p)) return; demonCharge(p); return;
-            case 5: if (onCd(dm_grasp, p)) return; voidGrasp(p); CooldownApi.addCooldown(dm_grasp, p, cooldowns.get(dm_grasp));
+                    if (onCd(dm_charge, p, this)) return; demonCharge(p); return;
+            case 5: if (onCd(dm_grasp, p, this)) return; voidGrasp(p); addCd(dm_grasp, p);
         }
     }
 
@@ -273,7 +271,7 @@ public class DemonPower extends Power implements IdlePower, Removeable {
             int t = 0;
             @Override public void run() {
                 if (t >= 50 || !p.isOnline()) {
-                    CooldownApi.addCooldown(dm_drain, p, cooldowns.get(dm_drain));
+                    addCd(dm_drain, p);
                     draining = false;
                     p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.6f, 1.6f);
                     cancel();
@@ -289,8 +287,8 @@ public class DemonPower extends Power implements IdlePower, Removeable {
                         ((LivingEntity) e).damage(3, p);
                         healed += 1.5;
                     }
-                    if (healed > 0 && p.getHealth() < p.getMaxHealth())
-                        p.setHealth(Math.min(p.getMaxHealth(), p.getHealth() + healed));
+                    if (healed > 0 && p.getHealth() < getMaxHp(p))
+                        p.setHealth(Math.min(getMaxHp(p), p.getHealth() + healed));
                 }
 
                 if (t % 2 == 0) {
@@ -321,7 +319,6 @@ public class DemonPower extends Power implements IdlePower, Removeable {
         drainRunnable.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void demonCharge(Player p) {
         charging = true;
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_RAVAGER_ROAR, 0.8f, 1.4f);
@@ -336,7 +333,7 @@ public class DemonPower extends Power implements IdlePower, Removeable {
                 if (t >= 8) {
                     chargeBlast(p.getLocation(), p);
                     charging = false;
-                    CooldownApi.addCooldown(dm_charge, p, cooldowns.get(dm_charge));
+                    addCd(dm_charge, p);
                     cancel();
                     return;
                 }
@@ -345,7 +342,7 @@ public class DemonPower extends Power implements IdlePower, Removeable {
                 if (!next.getBlock().isPassable() || next.getBlock().isLiquid()) {
                     chargeBlast(p.getLocation(), p);
                     charging = false;
-                    CooldownApi.addCooldown(dm_charge, p, cooldowns.get(dm_charge));
+                    addCd(dm_charge, p);
                     cancel();
                     return;
                 }
@@ -393,11 +390,10 @@ public class DemonPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
     private void voidGrasp(Player p) {
         LivingEntity target = getNearestTarget(p, 7);
         if (target == null) {
-            p.sendMessage(ChatColor.DARK_RED + "Không có mục tiêu trong tầm!");
+            p.sendMessage(ChatColor.DARK_RED + "No target in sight!");
             return;
         }
 
@@ -448,7 +444,6 @@ public class DemonPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void shadowCounter(DamagedByExecute ex) {
         Player p = ex.getPlayer();
         if (CooldownApi.isOnCooldown(dm_counter, p)) return;
@@ -465,7 +460,7 @@ public class DemonPower extends Power implements IdlePower, Removeable {
             ((LivingEntity) e).addPotionEffect(
                     new PotionEffect(PotionEffectType.BLINDNESS, 10, 0, false, true));
         }
-        CooldownApi.addCooldown(dm_counter, p, cooldowns.get(dm_counter));
+        addCd(dm_counter, p);
     }
     private void preventEnvFire(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
@@ -486,36 +481,38 @@ public class DemonPower extends Power implements IdlePower, Removeable {
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
                 p.setFireTicks(0);
-                Location base   = p.getLocation().clone();
-                Location center = base.clone().add(0, 1.1, 0);
-                for (int i = 0; i < 7; i++) {
-                    double a = Math.toRadians(i * 22.5 + t * 6);
-                    Location lp = center.clone().add(Math.cos(a)*1.15, Math.sin(a*0.4)*0.22, Math.sin(a)*1.15);
-                    particleApi.spawnColoredParticles(lp, AURA_COLORS[i % AURA_COLORS.length], 1.05f, 1, 0.03, 0.03, 0.03);
-                    if (i % 2 == 0)
-                        particleApi.spawnParticles(center.clone().add(Math.cos(a)*1.15, r.nextDouble()*0.25, Math.sin(a)*1.15),
-                                Particle.SOUL, 1, 0.04, 0.04, 0.04, 0.03);
-                }
-                for (int i = 0; i < 10; i++) {
-                    double a = Math.toRadians(i * 36 - t * 9);
-                    Location lp = center.clone().add(Math.cos(a)*0.7, 0.5 + Math.sin(a*0.6)*0.18, Math.sin(a)*0.7);
-                    particleApi.spawnColoredParticles(lp, i%2==0 ? C_PURPLE_DARK : C_DEEP_RED, 0.85f, 1, 0.03, 0.03, 0.03);
-                }
-                if (t % 3 == 0) {
-                    for (int i = 0; i < 8; i++) {
-                        double a = Math.toRadians(i * 45 + t * 4);
-                        Location foot = base.clone().add(Math.cos(a)*0.95, 0.05, Math.sin(a)*0.95);
-                        particleApi.spawnParticles(foot, Particle.SOUL_FIRE_FLAME, 1, 0.04, 0.01, 0.04, 0.01);
-                        particleApi.spawnColoredParticles(foot, C_BLOOD_RED, 0.75f, 1, 0.05, 0.01, 0.05);
+                if (isAuraEnabled(p)) {
+                    Location base   = p.getLocation().clone();
+                    Location center = base.clone().add(0, 1.1, 0);
+                    for (int i = 0; i < 7; i++) {
+                        double a = Math.toRadians(i * 22.5 + t * 6);
+                        Location lp = center.clone().add(Math.cos(a)*1.15, Math.sin(a*0.4)*0.22, Math.sin(a)*1.15);
+                        particleApi.spawnColoredParticles(lp, AURA_COLORS[i % AURA_COLORS.length], 1.05f, 1, 0.03, 0.03, 0.03);
+                        if (i % 2 == 0)
+                            particleApi.spawnParticles(center.clone().add(Math.cos(a)*1.15, r.nextDouble()*0.25, Math.sin(a)*1.15),
+                                    Particle.SOUL, 1, 0.04, 0.04, 0.04, 0.03);
                     }
+                    for (int i = 0; i < 10; i++) {
+                        double a = Math.toRadians(i * 36 - t * 9);
+                        Location lp = center.clone().add(Math.cos(a)*0.7, 0.5 + Math.sin(a*0.6)*0.18, Math.sin(a)*0.7);
+                        particleApi.spawnColoredParticles(lp, i%2==0 ? C_PURPLE_DARK : C_DEEP_RED, 0.85f, 1, 0.03, 0.03, 0.03);
+                    }
+                    if (t % 3 == 0) {
+                        for (int i = 0; i < 8; i++) {
+                            double a = Math.toRadians(i * 45 + t * 4);
+                            Location foot = base.clone().add(Math.cos(a)*0.95, 0.05, Math.sin(a)*0.95);
+                            particleApi.spawnParticles(foot, Particle.SOUL_FIRE_FLAME, 1, 0.04, 0.01, 0.04, 0.01);
+                            particleApi.spawnColoredParticles(foot, C_BLOOD_RED, 0.75f, 1, 0.05, 0.01, 0.05);
+                        }
+                    }
+                    if (t % 4 == 0) {
+                        Location rp = center.clone().add(
+                                (r.nextDouble()-0.5)*1.4, r.nextDouble()*1.7-0.25, (r.nextDouble()-0.5)*1.4);
+                        particleApi.spawnParticles(rp, Particle.SOUL_FIRE_FLAME, 1, 0.05, 0.05, 0.05, 0.02);
+                    }
+                    if (t % 80 == 0)
+                        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 0.18f, 0.65f);
                 }
-                if (t % 4 == 0) {
-                    Location rp = center.clone().add(
-                            (r.nextDouble()-0.5)*1.4, r.nextDouble()*1.7-0.25, (r.nextDouble()-0.5)*1.4);
-                    particleApi.spawnParticles(rp, Particle.SOUL_FIRE_FLAME, 1, 0.05, 0.05, 0.05, 0.02);
-                }
-                if (t % 80 == 0)
-                    p.getWorld().playSound(p.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 0.18f, 0.65f);
                 t++;
             }
         };
@@ -539,44 +536,5 @@ public class DemonPower extends Power implements IdlePower, Removeable {
             case 5: return "&5Void Grasp";
             default: return "&7none";
         }
-    }
-    private Location getRaycastTarget(Player p, int maxDist) {
-        Location cur = p.getEyeLocation().clone();
-        Vector dir   = p.getEyeLocation().getDirection().clone().normalize();
-        for (int i = 0; i < maxDist * 2; i++) {
-            cur.add(dir.clone().multiply(0.5));
-            if (!cur.getBlock().isPassable() || cur.getBlock().isLiquid()) {
-                cur.subtract(dir.clone().multiply(0.5));
-                break;
-            }
-        }
-        return cur;
-    }
-    private void adjustToGround(Location loc) {
-        for (int i = 0; i < 10; i++) {
-            if (!loc.clone().subtract(0, 1, 0).getBlock().isPassable()) break;
-            loc.subtract(0, 1, 0);
-        }
-        for (int i = 0; i < 10; i++) {
-            if (loc.getBlock().isPassable()) break;
-            loc.add(0, 1, 0);
-        }
-    }
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null;
-        double bestDist = radius;
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity)) continue;
-            double d = e.getLocation().distance(p.getLocation());
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
-    }
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
     }
 }

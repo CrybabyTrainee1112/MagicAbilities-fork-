@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -62,11 +63,11 @@ public class WindPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(w_slash,   p)) return; galeSlash(p);  CooldownApi.addCooldown(w_slash,   p, cooldowns.get(w_slash));   return;
-            case 1: if (onCd(w_cyclone, p)) return; cyclone(p);    CooldownApi.addCooldown(w_cyclone, p, cooldowns.get(w_cyclone)); return;
-            case 2: if (onCd(w_burst,   p)) return; windBurst(p);  CooldownApi.addCooldown(w_burst,   p, cooldowns.get(w_burst));   return;
-            case 3: if (onCd(w_step,    p)) return; galeStep(p);   CooldownApi.addCooldown(w_step,    p, cooldowns.get(w_step));    return;
-            case 4: if (onCd(w_tempest, p)) return; tempest(p);    CooldownApi.addCooldown(w_tempest, p, cooldowns.get(w_tempest));
+            case 0: if (onCd(w_slash, p, this)) return; galeSlash(p);  addCd(w_slash, p);   return;
+            case 1: if (onCd(w_cyclone, p, this)) return; cyclone(p);    addCd(w_cyclone, p); return;
+            case 2: if (onCd(w_burst, p, this)) return; windBurst(p);  addCd(w_burst, p);   return;
+            case 3: if (onCd(w_step, p, this)) return; galeStep(p);   addCd(w_step, p);    return;
+            case 4: if (onCd(w_tempest, p, this)) return; tempest(p);    addCd(w_tempest, p);
         }
     }
 
@@ -74,9 +75,9 @@ public class WindPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         if (slot == 5) {
-            if (onCd(w_leap, p)) return;
+            if (onCd(w_leap, p, this)) return;
             skyLeap(p);
-            CooldownApi.addCooldown(w_leap, p, cooldowns.get(w_leap));
+            addCd(w_leap, p);
         }
     }
     private void galeSlash(Player p) {
@@ -118,7 +119,6 @@ public class WindPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskTimer(magicPlugin, 0, 1);
     }
-
 
     private void cyclone(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1f, 0.6f);
@@ -325,7 +325,6 @@ public class WindPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
     private void skyLeap(Player p) {
         if (leaping) return;
         p.getWorld().playSound(p.getLocation(), Sound.ITEM_TRIDENT_THROW,  1f, 1.2f);
@@ -386,14 +385,12 @@ public class WindPower extends Power implements IdlePower, Removeable {
         if (leapRunnable != null) { leapRunnable.cancel(); leapRunnable = null; }
     }
 
-
     private void handleDamage(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(true);
         }
     }
-
 
     private long lastMoveMs = 0;
     private void onMove(MoveExecute ex) {
@@ -418,18 +415,20 @@ public class WindPower extends Power implements IdlePower, Removeable {
                     double a1 = Math.toRadians(i * 45 + t * 10);
                     double a2 = Math.toRadians(i * 45 - t * 14);
                     Location lp1 = p.getLocation().clone().add(
-                            Math.cos(a1)*1.0, 1.0 + Math.sin(a1*0.5)*0.2, Math.sin(a1)*1.0);
+                            Math.cos(a1)*1.0, 0.1 + Math.sin(a1*0.5)*0.05, Math.sin(a1)*1.0);
                     Location lp2 = p.getLocation().clone().add(
-                            Math.cos(a2)*0.6, 1.4 + Math.sin(a2*0.5)*0.15, Math.sin(a2)*0.6);
-                    particleApi.spawnColoredParticles(lp1,
-                            WIND_COLORS[i % WIND_COLORS.length], 0.9f, 1, 0.03, 0.03, 0.03);
-                    particleApi.spawnColoredParticles(lp2,
-                            i%2==0 ? C_SILVER : C_ICY_WHITE, 0.8f, 1, 0.03, 0.03, 0.03);
+                            Math.cos(a2)*0.6, 0.08 + Math.sin(a2*0.5)*0.04, Math.sin(a2)*0.6);
+                    if (isAuraEnabled(p)) {
+                        particleApi.spawnColoredParticles(lp1,
+                                WIND_COLORS[i % WIND_COLORS.length], 0.9f, 1, 0.03, 0.03, 0.03);
+                        particleApi.spawnColoredParticles(lp2,
+                                i%2==0 ? C_SILVER : C_ICY_WHITE, 0.8f, 1, 0.03, 0.03, 0.03);
+                    }
                 }
-                if (t % 3 == 0)
+                if (t % 3 == 0 && isAuraEnabled(p))
                     particleApi.spawnParticles(
                             p.getLocation().clone().add(
-                                    (r.nextDouble()-0.5)*1.2, r.nextDouble()*2, (r.nextDouble()-0.5)*1.2),
+                                    (r.nextDouble()-0.5)*1.2, r.nextDouble()*0.25, (r.nextDouble()-0.5)*1.2),
                             Particle.CLOUD, 1, 0.04, 0.04, 0.04, 0.06);
 
                 t++;
@@ -458,22 +457,11 @@ public class WindPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
-
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
 
     private void drawWindTrail(Location from, Location to) {
         new BukkitRunnable() {
