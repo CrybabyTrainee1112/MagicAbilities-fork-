@@ -1,4 +1,5 @@
 # MagicAbilities - Minecraft Plugin
+https://www.curseforge.com/minecraft/bukkit-plugins/magicabilities-fork
 This plugin adds a variety of amazing superpowers, through just the Spigot Api.
 
 > [!NOTE]
