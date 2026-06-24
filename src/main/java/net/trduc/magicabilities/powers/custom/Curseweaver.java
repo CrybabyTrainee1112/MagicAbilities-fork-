@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -57,7 +58,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 cleave(p, 0, false);
-                CooldownApi.addCooldown(cw_cleave, p, cooldowns.get(cw_cleave) / (isInDomain ? 5 : 1));
+                addCd(cw_cleave, p, 1.0 / (isInDomain ? 5 : 1));
                 return;
             case 1:
                 if (CooldownApi.isOnCooldown(cw_black, p)) {
@@ -65,7 +66,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 blackFlash(p);
-                CooldownApi.addCooldown(cw_black, p,  cooldowns.get(cw_black) / (isInDomain ? 4 : 1));
+                addCd(cw_black, p, 1.0 / (isInDomain ? 4 : 1));
                 return;
             case 2:
                 if (CooldownApi.isOnCooldown(cw_domain, p)) {
@@ -73,7 +74,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 domainExpansionBlossom(p);
-                CooldownApi.addCooldown(cw_domain, p,  cooldowns.get(cw_domain));
+                addCd(cw_domain, p);
                 return;
             case 3:
                 if (CooldownApi.isOnCooldown(cw_dawn, p)) {
@@ -81,7 +82,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 crimsonDawn(p);
-                CooldownApi.addCooldown(cw_dawn, p,   cooldowns.get(cw_dawn) / (isInDomain ? 2 : 1));
+                addCd(cw_dawn, p, 1.0 / (isInDomain ? 2 : 1));
                 return;
         }
     }
@@ -229,9 +230,9 @@ public class Curseweaver extends Power implements IdlePower {
     private void domainExpansionBlossom(Player p){
         Color[] colors = new Color[3];
         final Random r = new Random();
-        colors[0] = Color.PURPLE;
-        colors[1] = Color.fromRGB(252, 56, 255);
-        colors[2] = Color.fromRGB(250, 5, 181);
+        colors[0] = Color.fromRGB(220, 0, 0);
+        colors[1] = Color.fromRGB(160, 0, 0);
+        colors[2] = Color.fromRGB(255, 40, 40);
         p.getWorld().playSound(p.getLocation().clone(), Sound.ITEM_TRIDENT_THUNDER, 1, 2);
         Location start;
         if (p.getLocation().clone().add(0, -1, 0).getBlock().isPassable()){
@@ -241,7 +242,7 @@ public class Curseweaver extends Power implements IdlePower {
         }
 
         final Vector v = new Vector(1, 0, 0).normalize();
-        for (int i = 0; i< 30; i++){
+        for (int i = 0; i< 50; i++){
             int finalI = i;
             new BukkitRunnable() {
                 @Override
@@ -263,19 +264,19 @@ public class Curseweaver extends Power implements IdlePower {
                                 }
                             }
                         }
-                        particleApi.spawnColoredParticles(l, colors[r.nextInt(colors.length)], 1.2f, 1, 0.01, 0.01, 0.01);
+                        particleApi.spawnColoredParticles(l, colors[r.nextInt(colors.length)], 2.2f, 3, 0.01, 0.01, 0.01);
                     }
                 }
             }.runTaskLater(magicPlugin, i);
         }
-        for (int i = 0; i< 30; i++){
+        for (int i = 0; i< 50; i++){
             int finalI = i;
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     for (int j = 0; j<360 ;j++){
-                        Location l = start.clone().add(rotateVector(v.clone(), j).clone().normalize().multiply(finalI).add(new Vector(0, 30-finalI, 0)));
-                        particleApi.spawnColoredParticles(l, colors[r.nextInt(colors.length)], 1.2f, 1, 0.01, 0.01, 0.01);
+                        Location l = start.clone().add(rotateVector(v.clone(), j).clone().normalize().multiply(finalI).add(new Vector(0, 50-finalI, 0)));
+                        particleApi.spawnColoredParticles(l, colors[r.nextInt(colors.length)], 2.2f, 3, 0.01, 0.01, 0.01);
                     }
                 }
             }.runTaskLater(magicPlugin, 60-i);
@@ -284,6 +285,7 @@ public class Curseweaver extends Power implements IdlePower {
             final Location center = start.clone().add(0, 10, 0);
             final ArrayList<Creature> disabled = new ArrayList<>();
             final int domainTime = 15;
+            final Random r = new Random();
 
             @Override
             public void run() {
@@ -293,11 +295,13 @@ public class Curseweaver extends Power implements IdlePower {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, domainTime*20, 0));
                 p.getWorld().playSound(center, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1, 1.2f);
 
-                for (Entity e : p.getWorld().getNearbyEntities(center.clone(), 30, 30, 30)){
+                for (Entity e : p.getWorld().getNearbyEntities(center.clone(), 50, 50, 50)){
                     if (!(e instanceof LivingEntity) || e.equals(p)){
                         continue;
                     }
                     ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, domainTime*20, 0));
+                    ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, domainTime*20, 1));
+                    ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, domainTime*20, 1));
                     if (e instanceof Creature && !disabled.contains(e) && ((Creature) e).hasAI()){
                         ((Creature) e).setAI(false);
                         disabled.add((Creature) e);
@@ -312,17 +316,33 @@ public class Curseweaver extends Power implements IdlePower {
                     @Override
                     public void run() {
                         if (i%20==0 && maxTime+(domainTime-6)>domainTime){
-                            particleApi.spawnParticles(center.clone(), Particle.CHERRY_LEAVES, 4000, 30, 30, 30, 1);
+                            
+                            for (int k = 0; k < 80; k++) {
+                                double ox = (r.nextDouble()*2-1)*50;
+                                double oz = (r.nextDouble()*2-1)*50;
+                                double oy = r.nextDouble()*3;
+                                Location drop = start.clone().add(ox, oy, oz);
+                                particleApi.spawnColoredParticles(drop, Color.fromRGB(180 + r.nextInt(75), 0, 0), 2.0f, 1, 0.3, 0.1, 0.3);
+                            }
+                            
+                            double beatRad = (i / 20 % 6) * 8.0;
+                            for (int j = 0; j < 48; j++) {
+                                double ang = Math.toRadians(j * 7.5);
+                                Location ring = start.clone().add(Math.cos(ang)*beatRad, 0.05, Math.sin(ang)*beatRad);
+                                particleApi.spawnColoredParticles(ring, Color.fromRGB(200, 0, 0), 1.8f, 1, 0.02, 0.01, 0.02);
+                            }
                         }
 
-                        for (Entity e : p.getWorld().getNearbyEntities(center.clone(), 30, 30, 30)){
+                        for (Entity e : p.getWorld().getNearbyEntities(center.clone(), 50, 50, 50)){
                             if (!(e instanceof LivingEntity) || e.equals(p)){
                                 continue;
                             }
+                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, (int) (maxTime*20), 0));
+                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, (int) (maxTime*20), 1));
+                            ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, (int) (maxTime*20), 1));
                             if (e instanceof Creature && !disabled.contains(e) && ((Creature) e).hasAI()){
                                 ((Creature) e).setAI(false);
                                 disabled.add((Creature) e);
-                                ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, (int) (maxTime*20), 0));
                             }
                         }
 
@@ -406,7 +426,10 @@ public class Curseweaver extends Power implements IdlePower {
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0), Particle.ENCHANTED_HIT, 8, 0.1, 0.1, 0.1, 0.07);
+                if (!isAuraEnabled(p)) return;
+                particleApi.spawnColoredParticles(
+                        p.getLocation().clone().add(0, 0.06, 0),
+                        Color.fromRGB(180, 0, 180), 1.0f, 1, 0.3, 0.01, 0.3);
             }
         };
         r.runTaskTimer(magicPlugin, 0, 15);
@@ -421,7 +444,7 @@ public class Curseweaver extends Power implements IdlePower {
             case 1:
                 return "&8Black Flash";
             case 2:
-                return "&dDomain Expansion: Petals of Dusk";
+                return "&dDomain Expansion: Cursed Petals";
             case 3:
                 return "&cCrimson Dawn";
             default:

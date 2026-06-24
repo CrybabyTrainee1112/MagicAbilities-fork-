@@ -109,6 +109,10 @@ public class ParticleApi {
         loc.getWorld().spawnParticle(particle, loc, amount, offsetX, offsetY, offsetZ, speed, null);
     }
 
+    public void spawnParticles(Location loc, Particle particle, int amount, double offsetX, double offsetY, double offsetZ, double speed, Object data){
+        loc.getWorld().spawnParticle(particle, loc, amount, offsetX, offsetY, offsetZ, speed, data);
+    }
+
     public void spawnColoredParticles(Location loc, Color color, float size, int amount, double offsetX, double offsetY, double offsetZ){
         Particle.DustOptions dustOptions = new Particle.DustOptions(color, size);
         loc.getWorld().spawnParticle(Particle.DUST, loc, amount, offsetX, offsetY, offsetZ, 1, dustOptions, true);

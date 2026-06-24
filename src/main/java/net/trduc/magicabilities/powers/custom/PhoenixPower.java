@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -57,7 +58,6 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
 
     public PhoenixPower(Player owner) { super(owner); }
 
-
     @Override
     public void executePower(Execute ex) {
         if (ex instanceof DeathExecute)    { rebirth((DeathExecute) ex);          return; }
@@ -73,12 +73,12 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(ph_wings, p)) return; phoenixWings(p); CooldownApi.addCooldown(ph_wings, p, cooldowns.get(ph_wings)); return;
-            case 1: if (onCd(ph_flame, p)) return; sacredFlame(p);  CooldownApi.addCooldown(ph_flame, p, cooldowns.get(ph_flame)); return;
-            case 2: if (onCd(ph_storm, p)) return; featherStorm(p); CooldownApi.addCooldown(ph_storm, p, cooldowns.get(ph_storm)); return;
-            case 3: if (onCd(ph_dive,  p)) return; infernoDive(p);  CooldownApi.addCooldown(ph_dive,  p, cooldowns.get(ph_dive));  return;
-            case 4: if (onCd(ph_beam,    p)) return; solarBeam(p);    CooldownApi.addCooldown(ph_beam,    p, cooldowns.get(ph_beam));    return;
-            case 6: if (onCd(ph_tornado, p)) return; fireTornado(p);  CooldownApi.addCooldown(ph_tornado, p, cooldowns.get(ph_tornado));
+            case 0: if (onCd(ph_wings, p, this)) return; phoenixWings(p); addCd(ph_wings, p); return;
+            case 1: if (onCd(ph_flame, p, this)) return; sacredFlame(p);  addCd(ph_flame, p); return;
+            case 2: if (onCd(ph_storm, p, this)) return; featherStorm(p); addCd(ph_storm, p); return;
+            case 3: if (onCd(ph_dive, p, this)) return; infernoDive(p);  addCd(ph_dive, p);  return;
+            case 4: if (onCd(ph_beam, p, this)) return; solarBeam(p);    addCd(ph_beam, p);    return;
+            case 6: if (onCd(ph_tornado, p, this)) return; fireTornado(p);  addCd(ph_tornado, p);
         }
     }
 
@@ -95,12 +95,11 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         if (slot == 5) {
-            if (onCd(ph_ascend, p)) return;
+            if (onCd(ph_ascend, p, this)) return;
             ascension(p);
-            CooldownApi.addCooldown(ph_ascend, p, cooldowns.get(ph_ascend));
+            addCd(ph_ascend, p);
         }
     }
-
 
     private void phoenixWings(Player p) {
         if (flying) { stopFlight(p, true); return; }
@@ -553,8 +552,6 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0, 1);
     }
 
-
-
     private void rebirth(DeathExecute ex) {
         Player p = ex.getPlayer();
         if (!rebirthReady || CooldownApi.isOnCooldown(ph_rebirth, p)) return;
@@ -564,7 +561,7 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         ((PlayerDeathEvent) ex.getRawEvent()).getDrops().clear();
 
         rebirthReady = false;
-        CooldownApi.addCooldown(ph_rebirth, p, cooldowns.get(ph_rebirth));
+        addCd(ph_rebirth, p);
 
         new BukkitRunnable() {
             @Override public void run() {
@@ -606,7 +603,6 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         }.runTaskLater(magicPlugin, 1L);
     }
 
-
     private void preventFireDamage(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
         if (event.getCause() == EntityDamageEvent.DamageCause.FIRE
@@ -615,7 +611,6 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
             event.setCancelled(true);
         }
     }
-
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
@@ -630,19 +625,21 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 25, 1, false, false));
                 if (!flying)
                     p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 25, 0, false, false));
-                for (int i = 0; i < 6; i++) {
-                    double a = Math.toRadians(i * 60 + t * 8);
-                    Location lp = p.getLocation().clone().add(
-                            Math.cos(a) * 1.1, 1.2 + Math.sin(a * 0.5) * 0.15, Math.sin(a) * 1.1);
-                    Color c = AURA_COLORS[i % AURA_COLORS.length];
-                    particleApi.spawnColoredParticles(lp, c, 1.1f, 1, 0.03, 0.03, 0.03);
-                }
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 6; i++) {
+                        double a = Math.toRadians(i * 60 + t * 8);
+                        Location lp = p.getLocation().clone().add(
+                                Math.cos(a) * 1.1, 0.12 + Math.sin(a * 0.5) * 0.05, Math.sin(a) * 1.1);
+                        Color c = AURA_COLORS[i % AURA_COLORS.length];
+                        particleApi.spawnColoredParticles(lp, c, 1.1f, 1, 0.03, 0.03, 0.03);
+                    }
 
-                if (t % 4 == 0) {
-                    Color sc = r.nextInt(3) == 0 ? C_HOT_WHITE : (r.nextBoolean() ? C_GOLD : C_FLAME_ORG);
-                    particleApi.spawnColoredParticles(
-                            p.getLocation().clone().add((r.nextDouble()-0.5)*0.8, 0.5+r.nextDouble()*1.2, (r.nextDouble()-0.5)*0.8),
-                            sc, 0.9f, 1, 0.04, 0.04, 0.04);
+                    if (t % 4 == 0) {
+                        Color sc = r.nextInt(3) == 0 ? C_HOT_WHITE : (r.nextBoolean() ? C_GOLD : C_FLAME_ORG);
+                        particleApi.spawnColoredParticles(
+                                p.getLocation().clone().add((r.nextDouble()-0.5)*0.8, 0.05+r.nextDouble()*0.25, (r.nextDouble()-0.5)*0.8),
+                                sc, 0.9f, 1, 0.04, 0.04, 0.04);
+                    }
                 }
 
                 if (!rebirthReady && !CooldownApi.isOnCooldown(ph_rebirth, p)) {
@@ -833,21 +830,12 @@ public class PhoenixPower extends Power implements IdlePower, Removeable {
         }
     }
 
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
 
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
     private Vector yawRotate(Vector v, double yawDeg) {
         double r = Math.toRadians(yawDeg);
         return new Vector(v.getX()*Math.cos(r) + v.getZ()*Math.sin(r), v.getY(),

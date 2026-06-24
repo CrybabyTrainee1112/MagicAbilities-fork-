@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -61,7 +62,7 @@ public class Eternity extends Power implements IdlePower {
                     return;
                 }
                 blink(p);
-                CooldownApi.addCooldown(eternity_blink, p, cooldowns.get(eternity_blink));
+                addCd(eternity_blink, p);
                 return;
         }
     }
@@ -106,7 +107,7 @@ public class Eternity extends Power implements IdlePower {
                     return;
                 }
                 ult(p);
-                CooldownApi.addCooldown(eternity_oblivion, p, cooldowns.get(eternity_oblivion));
+                addCd(eternity_oblivion, p);
                 return;
         }
     }
@@ -236,7 +237,7 @@ public class Eternity extends Power implements IdlePower {
             return;
         }
         p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, onUlt ? 40 : 20, 255));
-        CooldownApi.addCooldown(eternity_immunity, p, cooldowns.get(eternity_immunity));
+        addCd(eternity_immunity, p);
     }
 
     private void resetCombo(){

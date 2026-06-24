@@ -11,12 +11,14 @@ public class PlayerData {
     private PowerType powerType;
     private HashMap<Integer, Integer> binds;
     private boolean enabled;
+    private boolean auraEnabled;
 
-    public PlayerData(String name, PowerType powerType, HashMap<Integer, Integer> binds, boolean enabled) {
+    public PlayerData(String name, PowerType powerType, HashMap<Integer, Integer> binds, boolean enabled, boolean auraEnabled) {
         this.name = name;
         this.powerType = powerType;
         this.binds = binds;
         this.enabled = enabled;
+        this.auraEnabled = auraEnabled;
     }
     public static PlayerData getPlayerData(Player p){
         return playerData.get(p);
@@ -58,5 +60,13 @@ public class PlayerData {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isAuraEnabled() {
+        return auraEnabled;
+    }
+
+    public void setAuraEnabled(boolean auraEnabled) {
+        this.auraEnabled = auraEnabled;
     }
 }

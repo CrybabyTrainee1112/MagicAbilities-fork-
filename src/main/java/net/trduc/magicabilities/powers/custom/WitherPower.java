@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -66,24 +67,24 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(wt_bolt,    p)) return;
+            case 0: if (onCd(wt_bolt, p, this)) return;
                     witherBolt(p, p.isSneaking() ? 3 : 1);
-                    CooldownApi.addCooldown(wt_bolt, p, p.isSneaking()
+                    addCdFixed(wt_bolt, p, p.isSneaking()
                             ? cooldowns.get(wt_bolt) * 2.2
                             : cooldowns.get(wt_bolt));
                     return;
-            case 1: if (onCd(wt_barrage, p)) return; skullBarrage(p);    CooldownApi.addCooldown(wt_barrage, p, cooldowns.get(wt_barrage)); return;
-            case 2: if (onCd(wt_mark,    p)) return; deathMark(p);       CooldownApi.addCooldown(wt_mark,    p, cooldowns.get(wt_mark));    return;
-            case 3: if (onCd(wt_shatter, p)) return; soulShatter(p);     CooldownApi.addCooldown(wt_shatter, p, cooldowns.get(wt_shatter)); return;
-            case 4: if (onCd(wt_storm,   p)) return; witherStorm(p);     CooldownApi.addCooldown(wt_storm,   p, cooldowns.get(wt_storm));   return;
+            case 1: if (onCd(wt_barrage, p, this)) return; skullBarrage(p);    addCd(wt_barrage, p); return;
+            case 2: if (onCd(wt_mark, p, this)) return; deathMark(p);       addCd(wt_mark, p);    return;
+            case 3: if (onCd(wt_shatter, p, this)) return; soulShatter(p);     addCd(wt_shatter, p); return;
+            case 4: if (onCd(wt_storm, p, this)) return; witherStorm(p);     addCd(wt_storm, p);   return;
             case 5:
                 if (p.getHealth() > 8 && !CooldownApi.isOnCooldown(wt_rez, p)) {
-                    p.sendMessage(ChatColor.DARK_GRAY + "Dark Resurrection: HP phải ≤ 4 để dùng thủ công!");
+                    p.sendMessage(ChatColor.DARK_GRAY + "Dark Resurrection: HP must be ≤ 4 to use manually!");
                     return;
                 }
-                if (onCd(wt_rez, p)) return;
+                if (onCd(wt_rez, p, this)) return;
                 darkResurrection(p);
-                CooldownApi.addCooldown(wt_rez, p, cooldowns.get(wt_rez));
+                addCd(wt_rez, p);
         }
     }
 
@@ -220,17 +221,17 @@ public class WitherPower extends Power implements IdlePower, Removeable {
     }
     private void deathMark(Player p) {
         if (activeMarks.size() >= 2) {
-            p.sendMessage(ChatColor.DARK_GRAY + "Đã đạt tối đa 2 Death Mark!");
+            p.sendMessage(ChatColor.DARK_GRAY + "Already reached the max of 2 Death Marks!");
             return;
         }
 
         LivingEntity target = getNearestTarget(p, 6);
         if (target == null) {
-            p.sendMessage(ChatColor.DARK_GRAY + "Không có mục tiêu trong tầm 6 block!");
+            p.sendMessage(ChatColor.DARK_GRAY + "No target in sight 6 block!");
             return;
         }
         if (activeMarks.containsKey(target.getUniqueId())) {
-            p.sendMessage(ChatColor.DARK_GRAY + "Kẻ này đã bị đánh dấu rồi!");
+            p.sendMessage(ChatColor.DARK_GRAY + "This target is already marked!");
             return;
         }
 
@@ -267,7 +268,7 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         };
         activeMarks.put(target.getUniqueId(), markRunnable);
         markRunnable.runTaskTimer(magicPlugin, 0, 1);
-        p.sendMessage(ChatColor.DARK_AQUA + "☠ Death Mark đặt! Nổ sau 3s...");
+        p.sendMessage(ChatColor.DARK_AQUA + "☠ Death Mark placed! Detonates in 3s...");
     }
 
     private void detonateMarkAt(Location loc, LivingEntity marked, Player p) {
@@ -456,7 +457,7 @@ public class WitherPower extends Power implements IdlePower, Removeable {
                 }
             }
         }.runTask(magicPlugin);
-        p.setHealth(Math.min(p.getMaxHealth(), p.getHealth() + 8));
+        p.setHealth(Math.min(getMaxHp(p), p.getHealth() + 8));
         p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 80, 1, false, false));
         p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 1, false, false));
         new BukkitRunnable() {
@@ -504,7 +505,7 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         if (p.getHealth() > 2) return;
         if (CooldownApi.isOnCooldown(wt_rez, p)) return;
         darkResurrection(p);
-        CooldownApi.addCooldown(wt_rez, p, cooldowns.get(wt_rez));
+        addCd(wt_rez, p);
     }
 
     private void killHeal(DealDamageExecute ex) {
@@ -518,7 +519,7 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         new BukkitRunnable() {
             @Override public void run() {
                 if (!p.isOnline()) return;
-                p.setHealth(Math.min(p.getMaxHealth(), p.getHealth() + 2));
+                p.setHealth(Math.min(getMaxHp(p), p.getHealth() + 2));
                 Location loc = p.getLocation().clone().add(0, 1, 0);
                 particleApi.spawnColoredParticles(loc, C_WITHER_TEAL,  1.3f, 15, 0.4, 0.4, 0.4);
                 particleApi.spawnColoredParticles(loc, C_WITHER_LIME,  1.1f, 10, 0.5, 0.5, 0.5);
@@ -526,7 +527,7 @@ public class WitherPower extends Power implements IdlePower, Removeable {
                 p.getWorld().playSound(loc, Sound.ENTITY_WITHER_HURT, 0.3f, 1.8f);
             }
         }.runTaskLater(magicPlugin, 1L);
-        CooldownApi.addCooldown(wt_kill, p, cooldowns.get(wt_kill));
+        addCd(wt_kill, p);
     }
     private void preventWither(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
@@ -546,42 +547,44 @@ public class WitherPower extends Power implements IdlePower, Removeable {
 
                 Location base   = p.getLocation().clone();
                 Location center = base.clone().add(0, 1.1, 0);
-                for (int i = 0; i < 10; i++) {
-                    double a = Math.toRadians(i * 22.5 + t * 7);
-                    double x = Math.cos(a) * 1.15;
-                    double z = Math.sin(a) * 1.15;
-                    particleApi.spawnColoredParticles(
-                        center.clone().add(x, Math.sin(a*0.4)*0.22, z),
-                        AURA_COLORS[i % AURA_COLORS.length], 1.05f, 1, 0.03, 0.03, 0.03);
-                    if (i % 2 == 0)
-                        particleApi.spawnParticles(
-                            center.clone().add(x, r.nextDouble()*0.25, z),
-                            Particle.SOUL, 1, 0.04, 0.04, 0.04, 0.02);
-                }
-                for (int i = 0; i < 7; i++) {
-                    double a = Math.toRadians(i * 36 - t * 10);
-                    Location lp = center.clone().add(Math.cos(a)*0.72, 0.5+Math.sin(a*0.6)*0.18, Math.sin(a)*0.72);
-                    particleApi.spawnColoredParticles(lp, i%2==0 ? C_BONE_WHITE : C_DEEP_TEAL, 0.9f, 1, 0.03, 0.03, 0.03);
-                }
-
-                if (t % 3 == 0) {
-                    for (int i = 0; i < 8; i++) {
-                        double a = Math.toRadians(i * 45 + t * 5);
-                        Location foot = base.clone().add(Math.cos(a)*0.95, 0.05, Math.sin(a)*0.95);
-                        particleApi.spawnParticles(foot, Particle.SOUL_FIRE_FLAME, 1, 0.04, 0.01, 0.04, 0.01);
-                        particleApi.spawnParticles(foot, Particle.ASH, 1, 0.05, 0.01, 0.05, 0.02);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 10; i++) {
+                        double a = Math.toRadians(i * 22.5 + t * 7);
+                        double x = Math.cos(a) * 1.15;
+                        double z = Math.sin(a) * 1.15;
+                        particleApi.spawnColoredParticles(
+                            center.clone().add(x, Math.sin(a*0.4)*0.22, z),
+                            AURA_COLORS[i % AURA_COLORS.length], 1.05f, 1, 0.03, 0.03, 0.03);
+                        if (i % 2 == 0)
+                            particleApi.spawnParticles(
+                                center.clone().add(x, r.nextDouble()*0.25, z),
+                                Particle.SOUL, 1, 0.04, 0.04, 0.04, 0.02);
                     }
+                    for (int i = 0; i < 7; i++) {
+                        double a = Math.toRadians(i * 36 - t * 10);
+                        Location lp = center.clone().add(Math.cos(a)*0.72, 0.5+Math.sin(a*0.6)*0.18, Math.sin(a)*0.72);
+                        particleApi.spawnColoredParticles(lp, i%2==0 ? C_BONE_WHITE : C_DEEP_TEAL, 0.9f, 1, 0.03, 0.03, 0.03);
+                    }
+
+                    if (t % 3 == 0) {
+                        for (int i = 0; i < 8; i++) {
+                            double a = Math.toRadians(i * 45 + t * 5);
+                            Location foot = base.clone().add(Math.cos(a)*0.95, 0.05, Math.sin(a)*0.95);
+                            particleApi.spawnParticles(foot, Particle.SOUL_FIRE_FLAME, 1, 0.04, 0.01, 0.04, 0.01);
+                            particleApi.spawnParticles(foot, Particle.ASH, 1, 0.05, 0.01, 0.05, 0.02);
+                        }
+                    }
+                    if (t % 4 == 0)
+                        particleApi.spawnParticles(
+                            center.clone().add((r.nextDouble()-0.5)*1.4, r.nextDouble()*1.7-0.3, (r.nextDouble()-0.5)*1.4),
+                            Particle.ASH, 2, 0.05, 0.05, 0.05, 0.02);
                 }
-                if (t % 4 == 0)
-                    particleApi.spawnParticles(
-                        center.clone().add((r.nextDouble()-0.5)*1.4, r.nextDouble()*1.7-0.3, (r.nextDouble()-0.5)*1.4),
-                        Particle.ASH, 2, 0.05, 0.05, 0.05, 0.02);
                 if (t % 30 == 0 && !CooldownApi.isOnCooldown(wt_aura, p)) {
                     for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), 1.8, 1.8, 1.8)) {
                         if (e.equals(p) || !(e instanceof LivingEntity)) continue;
                         ((LivingEntity) e).addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 0, false, true));
                         ((LivingEntity) e).damage(1, p);
-                        CooldownApi.addCooldown(wt_aura, p, cooldowns.get(wt_aura));
+                        addCd(wt_aura, p);
                     }
                 }
                 if (t % 100 == 0)
@@ -593,7 +596,6 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         task.runTaskTimer(magicPlugin, 0, 20);
         return task;
     }
-
 
     @Override
     public void remove() {
@@ -617,42 +619,4 @@ public class WitherPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
-    private Location getRaycastTarget(Player p, int maxDist) {
-        Location cur = p.getEyeLocation().clone();
-        Vector dir   = p.getEyeLocation().getDirection().clone().normalize();
-        for (int i = 0; i < maxDist * 2; i++) {
-            cur.add(dir.clone().multiply(0.5));
-            if (!cur.getBlock().isPassable() || cur.getBlock().isLiquid()) {
-                cur.subtract(dir.clone().multiply(0.5));
-                break;
-            }
-        }
-        return cur;
-    }
-
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null;
-        double bestDist = radius;
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity)) continue;
-            double d = e.getLocation().distance(p.getLocation());
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
-    }
-    private Vector rotateY(Vector v, double degrees) {
-        double rad = Math.toRadians(degrees);
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-        return new Vector(v.getX()*cos + v.getZ()*sin, v.getY(), -v.getX()*sin + v.getZ()*cos);
-    }
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
 }

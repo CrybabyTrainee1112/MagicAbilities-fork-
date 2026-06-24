@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
@@ -72,11 +73,11 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         if (slot != 0) return;
-        if (onCd(lightning_strike, p)) return;
+        if (onCd(lightning_strike, p, this)) return;
 
         Entity target = ((EntityDamageByEntityEvent) ex.getRawEvent()).getEntity();
         thunderStrike(p, target);
-        CooldownApi.addCooldown(lightning_strike, p, cooldowns.get(lightning_strike));
+        addCd(lightning_strike, p);
     }
 
     private void thunderStrike(Player p, Entity first) {
@@ -120,49 +121,47 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 3L, 3L);
     }
 
-
     private void executeLeftClick(LeftClickExecute ex) {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
 
         switch (slot) {
             case 1:
-                if (onCd(lightning_shot, p)) return;
+                if (onCd(lightning_shot, p, this)) return;
                 if (p.isSneaking()) {
                     lightningShot(p, 6);
-                    CooldownApi.addCooldown(lightning_shot, p, cooldowns.get(lightning_shot));
+                    addCd(lightning_shot, p);
                 } else {
                     lightningShot(p, 3);
-                    CooldownApi.addCooldown(lightning_shot, p, cooldowns.get(lightning_shot) / 2.0);
+                    addCd(lightning_shot, p, cooldowns.get(lightning_shot) / (2.0));
                 }
                 return;
 
             case 2:
                 if (fieldActive) return;
-                if (onCd(lightning_field, p)) return;
+                if (onCd(lightning_field, p, this)) return;
                 plasmaField(p);
                 return;
 
             case 3:
-                if (onCd(lightning_transmission, p)) return;
+                if (onCd(lightning_transmission, p, this)) return;
                 voltDash(p);
-                CooldownApi.addCooldown(lightning_transmission, p, cooldowns.get(lightning_transmission));
+                addCd(lightning_transmission, p);
                 return;
 
             case 4:
-                if (onCd(lightning_thunderclap, p)) return;
+                if (onCd(lightning_thunderclap, p, this)) return;
                 thunderclap(p);
-                CooldownApi.addCooldown(lightning_thunderclap, p, cooldowns.get(lightning_thunderclap));
+                addCd(lightning_thunderclap, p);
                 return;
 
             case 5:
-                if (onCd(lightning_ball, p)) return;
+                if (onCd(lightning_ball, p, this)) return;
                 ballLightning(p);
-                CooldownApi.addCooldown(lightning_ball, p, cooldowns.get(lightning_ball));
+                addCd(lightning_ball, p);
                 return;
         }
     }
-
 
     private void lightningShot(Player p, int segments) {
         Random r = new Random();
@@ -204,7 +203,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         }.runTaskTimer(magicPlugin, 0L, 2L);
     }
 
-
     private void plasmaField(Player p) {
         fieldActive = true;
         Random r = new Random();
@@ -218,7 +216,7 @@ public class LightningPower extends Power implements IdlePower, Removeable {
             public void run() {
                 if (t >= 80 || !p.isOnline()) {
                     p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.8f, 2f);
-                    CooldownApi.addCooldown(lightning_field, p, cooldowns.get(lightning_field));
+                    addCd(lightning_field, p);
                     fieldActive = false;
                     cancel();
                     return;
@@ -274,7 +272,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
     private void voltDash(Player p) {
         Location from = p.getEyeLocation().clone();
         Location to = from.clone();
@@ -325,7 +322,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         }.runTaskLater(magicPlugin, 2L);
     }
 
-
     private void thunderclap(Player p) {
         Location loc = p.getLocation().clone().add(0, 1, 0);
         Random r = new Random();
@@ -375,7 +371,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskLater(magicPlugin, 8L);
     }
-
 
     private void ballLightning(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_CREEPER_HURT, 1f, 2f);
@@ -477,9 +472,8 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.5f, 2f);
         particleApi.spawnParticles(p.getLocation().add(0, 1, 0), Particle.ELECTRIC_SPARK, 40, 0.5, 0.5, 0.5, 1.5);
 
-        CooldownApi.addCooldown(lightning_passive, p, cooldowns.get(lightning_passive));
+        addCd(lightning_passive, p);
     }
-
 
     private void preventSelfDamage(DamagedExecute ex) {
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
@@ -487,7 +481,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
             event.setCancelled(true);
         }
     }
-
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
@@ -502,9 +495,11 @@ public class LightningPower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { cancel(); return; }
 
                 p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 25, 1, false, false));
-                Location loc = p.getLocation().clone().add(0, 1, 0);
-                particleApi.spawnParticles(loc, Particle.ELECTRIC_SPARK, 5, 0.35, 0.4, 0.35, 0.05);
-                particleApi.spawnColoredParticles(loc, COLORS[t % COLORS.length], 0.8f, 2, 0.25, 0.3, 0.25);
+                Location loc = p.getLocation().clone().add(0, 0.1, 0);
+                if (isAuraEnabled(p)) {
+                    particleApi.spawnParticles(loc, Particle.ELECTRIC_SPARK, 2, 0.3, 0.02, 0.3, 0.02);
+                    particleApi.spawnColoredParticles(loc, COLORS[t % COLORS.length], 0.8f, 1, 0.25, 0.01, 0.25);
+                }
                 if (r.nextInt(100) < 15) {
                     for (Entity e : p.getWorld().getNearbyEntities(loc, 1.5, 1.5, 1.5)) {
                         if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
@@ -521,7 +516,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         return runnable;
     }
 
-
     @Override
     public void remove() {
         if (fieldRunnable != null) {
@@ -530,7 +524,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         }
         fieldActive = false;
     }
-
 
     @Override
     public String getAbilityName(int ability) {
@@ -547,14 +540,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
 
     private void safeRealLightning(Location loc, Player owner) {
         loc.getWorld().strikeLightning(loc);
-    }
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
     }
 
     private void flashLightningBeam(Location from, Location to, Player p, double damage) {

@@ -22,3 +22,6 @@ commands:
   powerset:
     description: Toggle or set your power on/off
     usage: /<command> [on|off]
+  powersetaura:
+    description: Toggle or set your power's idle aura particles on/off
+    usage: /<command> [on|off]

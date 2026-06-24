@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -70,11 +71,11 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
         Player p = ex.getPlayer();
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(tg_triple,   p)) return; tripleStrike(p);   CooldownApi.addCooldown(tg_triple,   p, cooldowns.get(tg_triple));   return;
-            case 1: if (onCd(tg_wrath,    p)) return; heavensWrath(p);   CooldownApi.addCooldown(tg_wrath,    p, cooldowns.get(tg_wrath));    return;
-            case 2: if (onCd(tg_cage,     p)) return; thunderCage(p);    CooldownApi.addCooldown(tg_cage,     p, cooldowns.get(tg_cage));     return;
-            case 3: if (onCd(tg_step,     p)) return; stormStep(p);      CooldownApi.addCooldown(tg_step,     p, cooldowns.get(tg_step));     return;
-            case 4: if (onCd(tg_judgment, p)) return; divineJudgment(p); CooldownApi.addCooldown(tg_judgment, p, cooldowns.get(tg_judgment));
+            case 0: if (onCd(tg_triple, p, this)) return; tripleStrike(p);   addCd(tg_triple, p);   return;
+            case 1: if (onCd(tg_wrath, p, this)) return; heavensWrath(p);   addCd(tg_wrath, p);    return;
+            case 2: if (onCd(tg_cage, p, this)) return; thunderCage(p);    addCd(tg_cage, p);     return;
+            case 3: if (onCd(tg_step, p, this)) return; stormStep(p);      addCd(tg_step, p);     return;
+            case 4: if (onCd(tg_judgment, p, this)) return; divineJudgment(p); addCd(tg_judgment, p);
         }
     }
 
@@ -104,7 +105,6 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
             }.runTaskLater(magicPlugin, idx * 3L);
         }
     }
-
 
     private void heavensWrath(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 0.7f);
@@ -207,7 +207,6 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
             }
         }.runTaskTimer(magicPlugin, 0, 1);
     }
-
 
     private void stormStep(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_CREEPER_HURT, 1f, 1.8f);
@@ -353,7 +352,6 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
         }.runTaskLater(magicPlugin, 3L);
     }
 
-
     private void deathThunder(DeathExecute ex) {
         Player p = ex.getPlayer();
         Location loc = p.getLocation().clone();
@@ -387,7 +385,6 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
             event.setCancelled(true);
     }
 
-
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
         final Player p = ex.getPlayer();
@@ -401,44 +398,46 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
                 Location base = p.getLocation().clone();
                 Location center = base.clone().add(0, 1.1, 0);
 
-                for (int i = 0; i < 16; i++) {
-                    double a = Math.toRadians(i * 22.5 + t * 5);
-                    double x = Math.cos(a) * 1.15;
-                    double z = Math.sin(a) * 1.15;
-                    particleApi.spawnParticles(
-                        center.clone().add(x, r.nextDouble() * 0.4 - 0.2, z),
-                        Particle.SCULK_SOUL, 1, 0.02, 0.02, 0.02, 0);
-                    particleApi.spawnColoredParticles(
-                        center.clone().add(x, r.nextDouble() * 0.6, z),
-                        CREEPER_COLORS[i % CREEPER_COLORS.length], 1.0f, 1, 0.03, 0.03, 0.03);
-                }
-
-                for (int i = 0; i < 10; i++) {
-                    double a = Math.toRadians(i * 36 - t * 8);
-                    double x = Math.cos(a) * 0.75;
-                    double z = Math.sin(a) * 0.75;
-                    particleApi.spawnColoredParticles(
-                        center.clone().add(x, 0.6 + Math.sin(a * 0.7) * 0.2, z),
-                        i % 2 == 0 ? C_CREEPER_LIME : C_CREEPER_TEAL, 0.9f, 1, 0.02, 0.02, 0.02);
-                }
-
-                if (t % 4 == 0) {
-                    for (int i = 0; i < 8; i++) {
-                        double a = Math.toRadians(i * 45 + t * 3);
-                        Location foot = base.clone().add(Math.cos(a)*1.0, 0.05, Math.sin(a)*1.0);
-                        particleApi.spawnParticles(foot, Particle.ELECTRIC_SPARK, 1, 0.04, 0.01, 0.04, 0.3);
-                        particleApi.spawnColoredParticles(foot, C_CREEPER_LIME, 0.8f, 1, 0.05, 0.01, 0.05);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 16; i++) {
+                        double a = Math.toRadians(i * 22.5 + t * 5);
+                        double x = Math.cos(a) * 1.15;
+                        double z = Math.sin(a) * 1.15;
+                        particleApi.spawnParticles(
+                            center.clone().add(x, r.nextDouble() * 0.1 - 0.05, z),
+                            Particle.SCULK_SOUL, 1, 0.02, 0.02, 0.02, 0);
+                        particleApi.spawnColoredParticles(
+                            center.clone().add(x, r.nextDouble() * 0.1, z),
+                            CREEPER_COLORS[i % CREEPER_COLORS.length], 1.0f, 1, 0.03, 0.03, 0.03);
                     }
-                }
-                if (t % 3 == 0) {
-                    particleApi.spawnParticles(
-                        center.clone().add((r.nextDouble()-0.5)*1.8, r.nextDouble()*1.5, (r.nextDouble()-0.5)*1.8),
-                        Particle.ELECTRIC_SPARK, 1, 0.05, 0.05, 0.05, 0.4);
-                }
-                for (int i = 0; i < 6; i++) {
-                    double a1 = Math.toRadians(i * 60 + t * 9);
-                    Location lp1 = center.clone().add(Math.cos(a1)*1.05, Math.sin(a1*0.5)*0.15, Math.sin(a1)*1.05);
-                    particleApi.spawnColoredParticles(lp1, AURA_COLORS[i % AURA_COLORS.length], 1.0f, 1, 0.03, 0.03, 0.03);
+
+                    for (int i = 0; i < 10; i++) {
+                        double a = Math.toRadians(i * 36 - t * 8);
+                        double x = Math.cos(a) * 0.75;
+                        double z = Math.sin(a) * 0.75;
+                        particleApi.spawnColoredParticles(
+                            center.clone().add(x, 0.06 + Math.sin(a * 0.7) * 0.04, z),
+                            i % 2 == 0 ? C_CREEPER_LIME : C_CREEPER_TEAL, 0.9f, 1, 0.02, 0.02, 0.02);
+                    }
+
+                    if (t % 4 == 0) {
+                        for (int i = 0; i < 8; i++) {
+                            double a = Math.toRadians(i * 45 + t * 3);
+                            Location foot = base.clone().add(Math.cos(a)*1.0, 0.05, Math.sin(a)*1.0);
+                            particleApi.spawnParticles(foot, Particle.ELECTRIC_SPARK, 1, 0.04, 0.01, 0.04, 0.3);
+                            particleApi.spawnColoredParticles(foot, C_CREEPER_LIME, 0.8f, 1, 0.05, 0.01, 0.05);
+                        }
+                    }
+                    if (t % 3 == 0) {
+                        particleApi.spawnParticles(
+                            center.clone().add((r.nextDouble()-0.5)*1.8, r.nextDouble()*1.5, (r.nextDouble()-0.5)*1.8),
+                            Particle.ELECTRIC_SPARK, 1, 0.05, 0.05, 0.05, 0.4);
+                    }
+                    for (int i = 0; i < 6; i++) {
+                        double a1 = Math.toRadians(i * 60 + t * 9);
+                        Location lp1 = center.clone().add(Math.cos(a1)*1.05, Math.sin(a1*0.5)*0.15, Math.sin(a1)*1.05);
+                        particleApi.spawnColoredParticles(lp1, AURA_COLORS[i % AURA_COLORS.length], 1.0f, 1, 0.03, 0.03, 0.03);
+                    }
                 }
                 if (t % 20 == 0 && !CooldownApi.isOnCooldown(tg_aura, p)) {
                     for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), 1.8, 1.8, 1.8)) {
@@ -447,7 +446,7 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
                         ((LivingEntity) e).damage(2, p);
                         drawBolt(p.getLocation().clone().add(0,1,0), e.getLocation().clone().add(0,1,0), C_CREEPER_LIME);
                         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_CREEPER_HURT, 0.4f, 2f);
-                        CooldownApi.addCooldown(tg_aura, p, cooldowns.get(tg_aura));
+                        addCd(tg_aura, p);
                     }
                 }
 
@@ -459,7 +458,6 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
     }
     @Override
     public void remove() {}
-
 
     @Override
     public String getAbilityName(int ability) {
@@ -526,22 +524,4 @@ public class ThunderGodPower extends Power implements IdlePower, Removeable {
         return cur;
     }
 
-    private LivingEntity getNearestTarget(Player p, double radius) {
-        LivingEntity best = null;
-        double bestDist = radius;
-        for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity) || e instanceof Player) continue;
-            double d = e.getLocation().distance(p.getLocation());
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
-    }
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
-    }
 }

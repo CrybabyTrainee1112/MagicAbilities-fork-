@@ -1,7 +1,6 @@
 package net.trduc.magicabilities;
 
 import net.trduc.magicabilities.commands.*;
-import net.trduc.magicabilities.commands.*;
 import net.trduc.magicabilities.cooldowns.Cooldowns;
 import net.trduc.magicabilities.data.DataEventsHandler;
 import net.trduc.magicabilities.data.DbManager;
@@ -54,6 +53,7 @@ public final class MagicAbilities extends JavaPlugin {
         registerCommand(new Enable(), "enable");
         registerCommand(new Disable(), "disable");
         registerCommand(new Powerset(), "powerset");
+        registerCommand(new Powersetaura(), "powersetaura");
         final GuiManager guiManager = new GuiManager(this);
         final AnimationManager animationManager = new AnimationManager(this, guiManager);
 
@@ -95,7 +95,7 @@ public final class MagicAbilities extends JavaPlugin {
     private void setPlayerData(DbManager db){
         for (Player p : getServer().getOnlinePlayers()){
             PlayerData.setPlayerDataFromDb(p, db);
-            new PowerPlayer(Power.getPowerFromPowerType(p, getPlayerData(p).getPower()), getPlayerData(p).getBinds(), getPlayerData(p).isEnabled());
+            new PowerPlayer(Power.getPowerFromPowerType(p, getPlayerData(p).getPower()), getPlayerData(p).getBinds(), getPlayerData(p).isEnabled(), getPlayerData(p).isAuraEnabled());
         }
     }
 
@@ -103,8 +103,10 @@ public final class MagicAbilities extends JavaPlugin {
         for (Player p : getServer().getOnlinePlayers()){
             PlayerData.savePlayerDataToDb(p, db);
             PlayerData.removePlayerData(p);
-            players.get(p).remove();
-            players.remove(p);
+            if (players.containsKey(p)) {
+                players.get(p).remove();
+                players.remove(p);
+            }
         }
     }
 

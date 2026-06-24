@@ -19,6 +19,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
@@ -68,13 +69,13 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         Player p   = ex.getPlayer();
         int   slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
-            case 0: if (onCd(wd_roar,   p)) return; longRoar(p);        CooldownApi.addCooldown(wd_roar,   p, cooldowns.get(wd_roar));   return;
-            case 1: if (onCd(wd_blades, p)) return; mocKiemVu(p);       CooldownApi.addCooldown(wd_blades, p, cooldowns.get(wd_blades)); return;
-            case 2: if (onCd(wd_net,    p)) return; thienLaDiaVong(p);  CooldownApi.addCooldown(wd_net,    p, cooldowns.get(wd_net));    return;
+            case 0: if (onCd(wd_roar, p, this)) return; longRoar(p);        addCd(wd_roar, p);   return;
+            case 1: if (onCd(wd_blades, p, this)) return; mocKiemVu(p);       addCd(wd_blades, p); return;
+            case 2: if (onCd(wd_net, p, this)) return; thienLaDiaVong(p);  addCd(wd_net, p);    return;
             case 3: if (charging)           return;
-                    if (onCd(wd_charge, p)) return; cuongLamXung(p);    return;
-            case 4: if (onCd(wd_grove,  p)) return; sinhMenhLam(p);     CooldownApi.addCooldown(wd_grove,  p, cooldowns.get(wd_grove));  return;
-            case 5: if (onCd(wd_roots,  p)) return; canVuongPhanNo(p);  CooldownApi.addCooldown(wd_roots,  p, cooldowns.get(wd_roots));
+                    if (onCd(wd_charge, p, this)) return; cuongLamXung(p);    return;
+            case 4: if (onCd(wd_grove, p, this)) return; sinhMenhLam(p);     addCd(wd_grove, p);  return;
+            case 5: if (onCd(wd_roots, p, this)) return; canVuongPhanNo(p);  addCd(wd_roots, p);
         }
     }
 
@@ -280,7 +281,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
                 if (t > 16 || (p.isOnGround() && t > 3)) {
                     chargeImpact(p.getLocation(), p, placed, r);
                     charging = false;
-                    CooldownApi.addCooldown(wd_charge, p, cooldowns.get(wd_charge));
+                    addCd(wd_charge, p);
                     cancel(); return;
                 }
                 Location loc = p.getLocation().clone();
@@ -562,26 +563,28 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
             int t = 0;
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
-                for (int i = 0; i < 7; i++) {
-                    double a1 = Math.toRadians(i * (360.0/7) + t * 7);
-                    double a2 = Math.toRadians(i * (360.0/7) - t * 10);
-                    Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.1, 1.1+Math.sin(a1*0.5)*0.18, Math.sin(a1)*1.1);
-                    Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.8+Math.sin(a2*0.5)*0.14, Math.sin(a2)*0.65);
-                    particleApi.spawnColoredParticles(lp1, AURA_COLS[i % AURA_COLS.length], 0.95f, 1, 0.03, 0.03, 0.03);
-                    particleApi.spawnColoredParticles(lp2, i%2==0 ? C_LIME : C_VINE,        0.85f, 1, 0.03, 0.03, 0.03);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 7; i++) {
+                        double a1 = Math.toRadians(i * (360.0/7) + t * 7);
+                        double a2 = Math.toRadians(i * (360.0/7) - t * 10);
+                        Location lp1 = p.getLocation().clone().add(Math.cos(a1)*1.1, 0.12+Math.sin(a1*0.5)*0.05, Math.sin(a1)*1.1);
+                        Location lp2 = p.getLocation().clone().add(Math.cos(a2)*0.65, 0.06+Math.sin(a2*0.5)*0.04, Math.sin(a2)*0.65);
+                        particleApi.spawnColoredParticles(lp1, AURA_COLS[i % AURA_COLS.length], 0.95f, 1, 0.03, 0.03, 0.03);
+                        particleApi.spawnColoredParticles(lp2, i%2==0 ? C_LIME : C_VINE,        0.85f, 1, 0.03, 0.03, 0.03);
+                    }
+                    if (t % 3 == 0)
+                        particleApi.spawnParticles(p.getLocation().clone().add(
+                                (r.nextDouble()-0.5)*1.4, r.nextDouble()*0.3, (r.nextDouble()-0.5)*1.4),
+                                Particle.CHERRY_LEAVES, 1, 0.04, 0.04, 0.04, 0.04);
                 }
-                if (t % 3 == 0)
-                    particleApi.spawnParticles(p.getLocation().clone().add(
-                            (r.nextDouble()-0.5)*1.4, r.nextDouble()*2.2, (r.nextDouble()-0.5)*1.4),
-                            Particle.CHERRY_LEAVES, 1, 0.04, 0.04, 0.04, 0.04);
 
                 if (t % 4 == 0) {
                     Block below = p.getLocation().clone().add(0,-1,0).getBlock();
                     if (p.isOnGround() && (below.getType()==Material.GRASS_BLOCK
                             || below.getType()==Material.MOSS_BLOCK
                             || below.getType()==Material.DIRT)) {
-                        if (p.getHealth() < p.getMaxHealth())
-                            p.setHealth(Math.min(p.getMaxHealth(), p.getHealth() + 1.0));
+                        if (p.getHealth() < getMaxHp(p))
+                            p.setHealth(Math.min(getMaxHp(p), p.getHealth() + 1.0));
                     }
                 }
 
@@ -603,7 +606,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
 
                     le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 22, 0, false, false));
 
-                    if (t % 2 == 0)
+                    if (t % 2 == 0 && isAuraEnabled(p))
                         particleApi.spawnColoredParticles(le.getLocation().clone().add(0,1,0),
                                 C_VINE, 0.75f, 1, 0.25, 0.4, 0.25);
                 }
@@ -649,21 +652,11 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         }
     }
 
-
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p)); return true;
-        }
-        return false;
-    }
-
     private ArmorStand spawnAs(Location loc) {
         return loc.getWorld().spawn(loc, ArmorStand.class, en -> {
             en.setVisible(false); en.setGravity(false); en.setSmall(true); en.setMarker(true);
         });
     }
-    private void safeRemove(ArmorStand as) { if (!as.isDead()) as.remove(); }
-
     private void spawnRootBurst(Location loc, double radius) {
         for (int i = 0; i < 6; i++) {
             double a = Math.toRadians(i * 60);

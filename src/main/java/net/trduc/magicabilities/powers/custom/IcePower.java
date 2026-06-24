@@ -24,6 +24,7 @@ import java.util.Random;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
 import static net.trduc.magicabilities.MagicAbilities.*;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
 import static net.trduc.magicabilities.players.PowerPlayer.players;
 
@@ -35,7 +36,6 @@ public class IcePower extends Power implements IdlePower {
     private static final String ice_multi_bolt = "ice.multi-bolt";
     private static final String ice_slashes = "ice.slashes";
     private static final String ice_phase_change = "ice.phase-change";
-
 
     public IcePower(Player owner) {
         super(owner);
@@ -95,7 +95,7 @@ public class IcePower extends Power implements IdlePower {
                     return;
                 }
                 shootIce(ex, 1, 0);
-                CooldownApi.addCooldown(ice_bolt, p, cooldowns.get(ice_bolt));
+                addCd(ice_bolt, p);
                 return;
             case 1:
                 if (CooldownApi.isOnCooldown(ice_machine_gun, p)) {
@@ -110,7 +110,7 @@ public class IcePower extends Power implements IdlePower {
                         }
                     }.runTaskLater(magicPlugin, i*10);
                 }
-                CooldownApi.addCooldown(ice_machine_gun, p, cooldowns.get(ice_machine_gun));
+                addCd(ice_machine_gun, p);
                 return;
             case 2:
                 if (CooldownApi.isOnCooldown(ice_spikes, p)) {
@@ -118,7 +118,7 @@ public class IcePower extends Power implements IdlePower {
                     return;
                 }
                 iceSpikesFromBelow(ex, 1.1);
-                CooldownApi.addCooldown(ice_spikes, p, cooldowns.get(ice_spikes));
+                addCd(ice_spikes, p);
                 return;
             case 3:
                 if (CooldownApi.isOnCooldown(ice_star, p)) {
@@ -126,7 +126,7 @@ public class IcePower extends Power implements IdlePower {
                     return;
                 }
                 explode(ex, 1.4);
-                CooldownApi.addCooldown(ice_star, p, cooldowns.get(ice_star));
+                addCd(ice_star, p);
                 return;
             case 4:
                 if (CooldownApi.isOnCooldown(ice_multi_bolt, p)) {
@@ -138,7 +138,7 @@ public class IcePower extends Power implements IdlePower {
                     shootIce(ex, 0.8, rotation);
                     rotation+=10;
                 }
-                CooldownApi.addCooldown(ice_multi_bolt, p, cooldowns.get(ice_multi_bolt));
+                addCd(ice_multi_bolt, p);
                 return;
             case 5:
                 if (CooldownApi.isOnCooldown(ice_slashes, p)) {
@@ -146,7 +146,7 @@ public class IcePower extends Power implements IdlePower {
                     return;
                 }
                 iceSlash(ex);
-                CooldownApi.addCooldown(ice_slashes, p, cooldowns.get(ice_slashes));
+                addCd(ice_slashes, p);
                 return;
             case 8:
                 if (CooldownApi.isOnCooldown(ice_phase_change, p)) {
@@ -154,7 +154,7 @@ public class IcePower extends Power implements IdlePower {
                     return;
                 };
                 phaseChange(ex);
-                CooldownApi.addCooldown(ice_phase_change, p, cooldowns.get(ice_phase_change));
+                addCd(ice_phase_change, p);
                 return;
 
         }
@@ -512,8 +512,6 @@ public class IcePower extends Power implements IdlePower {
         return 13.0*m;
     }
 
-
-
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
         final Player p = ex.getPlayer();
@@ -524,8 +522,10 @@ public class IcePower extends Power implements IdlePower {
                     p.setFireTicks(20);
                 }
                 p.setFreezeTicks(0);
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
-                        Particle.SNOWFLAKE, 5, 0.3, 0.3, 0.3, 0.01);
+                if (isAuraEnabled(p)) {
+                    particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
+                            Particle.SNOWFLAKE, 5, 0.3, 0.3, 0.3, 0.01);
+                }
             }
         };
         r.runTaskTimer(magicPlugin, 0, 15);

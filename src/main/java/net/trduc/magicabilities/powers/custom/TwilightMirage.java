@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -65,39 +66,37 @@ public class TwilightMirage extends Power implements IdlePower {
         int slot = getPlayerData(p).getBinds().get(players.get(p).getActiveSlot());
         switch (slot) {
             case 0:
-                if (onCd(tm_shriek, p)) return;
+                if (onCd(tm_shriek, p, this)) return;
                 shriekTransition(p);
-                CooldownApi.addCooldown(tm_shriek, p, cooldowns.get(tm_shriek));
+                addCd(tm_shriek, p);
                 return;
             case 1:
-                if (onCd(tm_float, p)) return;
+                if (onCd(tm_float, p, this)) return;
                 twilightLeap(p);
-                CooldownApi.addCooldown(tm_float, p, cooldowns.get(tm_float));
+                addCd(tm_float, p);
                 return;
             case 2:
-                if (onCd(tm_missile, p)) return;
+                if (onCd(tm_missile, p, this)) return;
                 if (p.isSneaking()) {
                     for (int deg : new int[]{-18, 0, 18})
                         magicMissile(p, deg);
-                    CooldownApi.addCooldown(tm_missile, p, cooldowns.get(tm_missile) * 2.0);
+                    addCd(tm_missile, p, 2.0);
                 } else {
                     magicMissile(p, 0);
-                    CooldownApi.addCooldown(tm_missile, p, cooldowns.get(tm_missile));
+                    addCd(tm_missile, p);
                 }
                 return;
             case 3:
-                if (onCd(tm_healing, p)) return;
+                if (onCd(tm_healing, p, this)) return;
                 healingMirage(p);
-                CooldownApi.addCooldown(tm_healing, p, cooldowns.get(tm_healing));
+                addCd(tm_healing, p);
                 return;
             case 4:
-                if (onCd(tm_eclipse, p)) return;
+                if (onCd(tm_eclipse, p, this)) return;
                 phantomEclipse(p);
-                CooldownApi.addCooldown(tm_eclipse, p, cooldowns.get(tm_eclipse));
+                addCd(tm_eclipse, p);
         }
     }
-
-
 
     private void shriekTransition(Player p) {
         boolean night = isNight(p);
@@ -327,7 +326,7 @@ public class TwilightMirage extends Power implements IdlePower {
                         phantomLoc = orbitPos.clone();
                         drawPhantom(phantomLoc, phantomIdx, t);
                         if (t % 8 == phantomIdx * 2) {
-                            LivingEntity target = findTarget(p, phantomLoc, 6.0);
+                            LivingEntity target = findTargetFromLoc(p, phantomLoc, 6.0);
                             if (target != null && !phantomHitCooldown.contains(target.getUniqueId())) {
                                 striking = true;
                                 strikeTarget = target.getLocation().clone().add(0, 1, 0);
@@ -394,16 +393,6 @@ public class TwilightMirage extends Power implements IdlePower {
         particleApi.spawnColoredParticles(loc, C_TM_WHITE,  1.5f, 3, 0.05, 0.05, 0.05);
         particleApi.spawnColoredParticles(loc, idx%2==0 ? C_TM_TEAL : C_TM_LAVENDER, 1.3f, 2, 0.05, 0.05, 0.05);
     }
-    private LivingEntity findTarget(Player p, Location from, double radius) {
-        LivingEntity best = null;
-        double bestDist = radius;
-        for (Entity e : from.getWorld().getNearbyEntities(from, radius, radius, radius)) {
-            if (e.equals(p) || !(e instanceof LivingEntity) || e instanceof Player) continue;
-            double d = e.getLocation().distance(from);
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) e; }
-        }
-        return best;
-    }
     private void onDamagedBy(DamagedByExecute execute) {
         final Player p = execute.getPlayer();
         final EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) execute.getRawEvent();
@@ -456,7 +445,7 @@ public class TwilightMirage extends Power implements IdlePower {
                 if (!event.isCancelled()) onDeath(execute);
                 return;
             }
-            CooldownApi.addCooldown(tm_neardeath, p, 180);
+            addCdFixed(tm_neardeath, p, 180);
             event.setCancelled(true);
             p.setHealth(isNight(p) ? 6 : 4);
             if (org.bukkit.Bukkit.getOnlinePlayers().size() > 1) {
@@ -485,13 +474,13 @@ public class TwilightMirage extends Power implements IdlePower {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20, 0, false, false));
                 if (p.hasPotionEffect(PotionEffectType.WITHER))
                     p.removePotionEffect(PotionEffectType.WITHER);
-                Location loc = p.getLocation().clone().add(0, 1, 0);
-                particleApi.spawnParticles(loc, Particle.SCULK_SOUL, 3, 0.5, 0.5, 0.5, 0.02);
+                Location loc = p.getLocation().clone().add(0, 0.06, 0);
                 for (int i = 0; i < 6; i++) {
                     double a = Math.toRadians(i * 60 + t * 8);
-                    Location lp = loc.clone().add(Math.cos(a)*0.9, Math.sin(a*0.4)*0.2, Math.sin(a)*0.9);
+                    Location lp = loc.clone().add(Math.cos(a)*0.9, 0, Math.sin(a)*0.9);
                     particleApi.spawnColoredParticles(lp, i%2==0 ? C_TM_PURPLE : C_TM_TEAL, 0.85f, 1, 0.03, 0.03, 0.03);
                 }
+                particleApi.spawnColoredParticles(loc, C_TM_PURPLE, 0.85f, 1, 0.28, 0.01, 0.28);
 
                 t++;
             }
@@ -519,15 +508,5 @@ public class TwilightMirage extends Power implements IdlePower {
     }
     private boolean isClearWeather(Player p) {
         return p.getWorld().isClearWeather();
-    }
-    private void safeRemove(ArmorStand as) {
-        if (!as.isDead()) as.remove();
-    }
-    private boolean onCd(String key, Player p) {
-        if (CooldownApi.isOnCooldown(key, p)) {
-            onCooldownInfo(CooldownApi.getCooldownForPlayerLong(key, p));
-            return true;
-        }
-        return false;
     }
 }

@@ -22,6 +22,7 @@ import org.bukkit.util.Vector;
 import java.util.HashMap;
 
 import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
+import static net.trduc.magicabilities.misc.PowerUtils.*;
 import static net.trduc.magicabilities.MagicAbilities.particleApi;
 import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
 import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
@@ -59,7 +60,7 @@ public class PotatoPower extends Power {
             return;
         }
         p.getInventory().addItem(new ItemStack(Material.POTATO, 1));
-        CooldownApi.addCooldown(potato_get, p, cooldowns.get(potato_get));
+        addCd(potato_get, p);
         return;
     }
 
@@ -89,7 +90,7 @@ public class PotatoPower extends Power {
         }
         p.getInventory().getItemInMainHand().setAmount(p.getInventory().getItemInMainHand().getAmount()-1);
         throwPotato(p);
-        CooldownApi.addCooldown(potato_shoot, p, cooldowns.get(potato_shoot));
+        addCd(potato_shoot, p);
     }
 
     private void throwPotato(Player p){
