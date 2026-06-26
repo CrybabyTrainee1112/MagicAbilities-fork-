@@ -58,7 +58,6 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 cleave(p, 0, false);
-                addCd(cw_cleave, p, cooldowns.get(cw_cleave) / ((isInDomain ? 5 : 1)));
                 addCd(cw_cleave, p, 1.0 / (isInDomain ? 5 : 1));
                 return;
             case 1:
@@ -67,7 +66,6 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 blackFlash(p);
-                addCd(cw_black, p, cooldowns.get(cw_black) / ((isInDomain ? 4 : 1)));
                 addCd(cw_black, p, 1.0 / (isInDomain ? 4 : 1));
                 return;
             case 2:
@@ -84,7 +82,6 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 crimsonDawn(p);
-                addCd(cw_dawn, p, cooldowns.get(cw_dawn) / ((isInDomain ? 2 : 1)));
                 addCd(cw_dawn, p, 1.0 / (isInDomain ? 2 : 1));
                 return;
         }
@@ -319,7 +316,7 @@ public class Curseweaver extends Power implements IdlePower {
                     @Override
                     public void run() {
                         if (i%20==0 && maxTime+(domainTime-6)>domainTime){
-                            
+
                             for (int k = 0; k < 80; k++) {
                                 double ox = (r.nextDouble()*2-1)*50;
                                 double oz = (r.nextDouble()*2-1)*50;
@@ -327,7 +324,7 @@ public class Curseweaver extends Power implements IdlePower {
                                 Location drop = start.clone().add(ox, oy, oz);
                                 particleApi.spawnColoredParticles(drop, Color.fromRGB(180 + r.nextInt(75), 0, 0), 2.0f, 1, 0.3, 0.1, 0.3);
                             }
-                            
+
                             double beatRad = (i / 20 % 6) * 8.0;
                             for (int j = 0; j < 48; j++) {
                                 double ang = Math.toRadians(j * 7.5);

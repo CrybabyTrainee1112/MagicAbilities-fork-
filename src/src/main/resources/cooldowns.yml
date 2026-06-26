@@ -305,11 +305,6 @@ spike:
   wall:   14
   trail:  10
   pillar: 45
-  strike: 4
-  burst:  10
-  grasp:  9
-  wall:   16
-  storm:  45
 
 magnetic:
   pull: 8

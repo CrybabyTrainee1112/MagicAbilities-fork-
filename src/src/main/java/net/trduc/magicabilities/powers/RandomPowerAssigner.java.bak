@@ -33,20 +33,6 @@ public class RandomPowerAssigner {
             PowerType.CRYSTAL,
             PowerType.EARTH,
             PowerType.MAGNETIC
-            PowerType.MAGNETIC,
-            PowerType.UNSTABLE,
-            PowerType.HUASHAN,
-            PowerType.DEMON_LORD,
-            PowerType.GRAVITY,
-            PowerType.SHOCKWAVE,
-            PowerType.PORTAL,
-            PowerType.CLOUD,
-            PowerType.VAMPIRE,
-            PowerType.POISON,
-            PowerType.AIR,
-            PowerType.DEATH,
-            PowerType.SOUND,
-            PowerType.SPIKE
     ));
 
     private static final Random RNG = new Random();
