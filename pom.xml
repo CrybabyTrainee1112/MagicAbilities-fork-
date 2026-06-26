@@ -6,6 +6,7 @@
 
     <groupId>net.trduc</groupId>
     <artifactId>MagicAbilities_fork</artifactId>
+    <version>1.0.1</version>
     <version>1.0.1-fix</version>
     <packaging>jar</packaging>
 

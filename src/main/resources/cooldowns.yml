@@ -301,6 +301,10 @@ earth:
   slam: 18
 
 spike:
+  shoot:  2.5
+  wall:   14
+  trail:  10
+  pillar: 45
   strike: 4
   burst:  10
   grasp:  9

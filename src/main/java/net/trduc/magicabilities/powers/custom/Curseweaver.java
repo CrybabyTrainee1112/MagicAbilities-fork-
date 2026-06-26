@@ -58,6 +58,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 cleave(p, 0, false);
+                addCd(cw_cleave, p, cooldowns.get(cw_cleave) / ((isInDomain ? 5 : 1)));
                 addCd(cw_cleave, p, 1.0 / (isInDomain ? 5 : 1));
                 return;
             case 1:
@@ -66,6 +67,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 blackFlash(p);
+                addCd(cw_black, p, cooldowns.get(cw_black) / ((isInDomain ? 4 : 1)));
                 addCd(cw_black, p, 1.0 / (isInDomain ? 4 : 1));
                 return;
             case 2:
@@ -82,6 +84,7 @@ public class Curseweaver extends Power implements IdlePower {
                     return;
                 }
                 crimsonDawn(p);
+                addCd(cw_dawn, p, cooldowns.get(cw_dawn) / ((isInDomain ? 2 : 1)));
                 addCd(cw_dawn, p, 1.0 / (isInDomain ? 2 : 1));
                 return;
         }

@@ -32,6 +32,7 @@ public class RandomPowerAssigner {
             PowerType.BLOOD,
             PowerType.CRYSTAL,
             PowerType.EARTH,
+            PowerType.MAGNETIC
             PowerType.MAGNETIC,
             PowerType.UNSTABLE,
             PowerType.HUASHAN,
