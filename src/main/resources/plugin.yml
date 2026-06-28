@@ -1,6 +1,6 @@
-name: MagicAbilities
+name: MagicAbilitiesfork
 version: '${project.version}'
-main: net.trduc.magicabilities.MagicAbilities
+main: net.trduc.magicabilitiesfork.MagicAbilitiesfork
 api-version: '1.21'
 commands:
   binds:

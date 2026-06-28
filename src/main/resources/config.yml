@@ -1,3 +1,5 @@
+config-version: 1
+
 debug: true
 
 # ═══ SnowpartingBladePower — XP costs ═══
@@ -128,3 +130,7 @@ poison:
 air:
   xp:
     collapse: 22
+
+lunar:
+  xp:
+    domain: 0

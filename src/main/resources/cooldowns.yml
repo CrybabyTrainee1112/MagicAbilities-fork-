@@ -314,3 +314,18 @@ magnetic:
   polarity: 2
   scrap: 12
   cage: 20
+
+potato:
+  get: 3
+  shoot: 0.5
+config-version: 1
+
+lunar:
+  crescent: 3
+  shadow:   10
+  tide:     14
+  eclipse:  20
+  domain:   600
+
+test:
+  annihilation: 180
