@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.*;
@@ -12,12 +12,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown;
 
 public class PoisonPower extends Power implements IdlePower, Removeable {
 
@@ -29,7 +29,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
     private static final String p_armor   = "poison.armor";
     private static final String p_shadow  = "poison.shadow";
     private static final String p_deluge  = "poison.deluge";
-    private static final String p_counter = "poison.counter";  
+    private static final String p_counter = "poison.counter";
 
     private int XP_DELUGE;
 
@@ -131,7 +131,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                     if (e instanceof LivingEntity) {
                         LivingEntity le = (LivingEntity) e;
                         le.damage(9 * mult, p);
-                        applyPotion(le, PotionEffectType.POISON,   100, 1); 
+                        applyPotion(le, PotionEffectType.POISON,   100, 1);
                         applyPotion(le, PotionEffectType.SLOWNESS,  40, 0);
                         addVenomStack(p, le);
                         spawnToxBurst(loc, 25);
@@ -199,7 +199,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
         new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
-                if (t > 120) { cancel(); return; } 
+                if (t > 120) { cancel(); return; }
 
                 for (int i = 0; i < 14; i++) {
                     double a = Math.toRadians(rng.nextDouble() * 360);
@@ -211,14 +211,14 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                     if (rng.nextInt(4) == 0)
                         particleApi.spawnColoredParticles(pt, C_BLACK_TOX, 0.8f, 1, 0.1, 0.06, 0.1);
                 }
-                
+
                 particleCircle(center.clone().add(0, 0.1, 0), 2.5, C_DARK_GRN, 1.0f, 12, t * 10);
 
                 if (t % 8 == 0) {
                     for (Entity e : center.getWorld().getNearbyEntities(center, 2.6, 2.6, 2.6)) {
                         if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
                         LivingEntity le = (LivingEntity) e;
-                        applyPotion(le, PotionEffectType.POISON,   60, 2); 
+                        applyPotion(le, PotionEffectType.POISON,   60, 2);
                         applyPotion(le, PotionEffectType.SLOWNESS,  40, 1);
                         le.damage(1.5, p);
                         if (t % 24 == 0) addVenomStack(p, le);
@@ -260,11 +260,11 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                     hit.add(e);
                     LivingEntity le = (LivingEntity) e;
                     le.damage(14, p);
-                    applyPotion(le, PotionEffectType.POISON,   60, 3); 
+                    applyPotion(le, PotionEffectType.POISON,   60, 3);
                     applyPotion(le, PotionEffectType.SLOWNESS,  60, 2);
                     applyPotion(le, PotionEffectType.WEAKNESS,  50, 1);
                     addVenomStack(p, le);
-                    addVenomStack(p, le); 
+                    addVenomStack(p, le);
                     spawnToxBurst(e.getLocation().clone().add(0, 1, 0), 20);
                     e.getWorld().playSound(e.getLocation(), Sound.ENTITY_PLAYER_HURT, 0.6f, 0.5f);
                 }
@@ -303,7 +303,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                     cancel();
                     return;
                 }
-                
+
                 for (int i = 0; i < 10; i++) {
                     double a = Math.toRadians(i * 36 + t * 9);
                     Location pt = p.getLocation().clone().add(Math.cos(a)*1.0, 0.08, Math.sin(a)*1.0);
@@ -349,10 +349,10 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(dest, Sound.BLOCK_SLIME_BLOCK_PLACE, 0.7f, 0.4f);
 
         target.damage(12, p);
-        applyPotion(target, PotionEffectType.POISON,   120, 4); 
+        applyPotion(target, PotionEffectType.POISON,   120, 4);
         applyPotion(target, PotionEffectType.WEAKNESS,  80, 1);
         applyPotion(target, PotionEffectType.SLOWNESS,  60, 2);
-        
+
         addVenomStack(p, target);
         addVenomStack(p, target);
         addVenomStack(p, target);
@@ -379,7 +379,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                 if (t < 30) {
                     double grow = (double) t / 30;
                     double r = 4 + grow * 16;
-                    
+
                     for (int i = 0; i < 20; i++) {
                         double a = Math.toRadians(rng.nextDouble() * 360);
                         double d = rng.nextDouble() * r;
@@ -393,7 +393,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                 }
 
                 else if (t < 120) {
-                    
+
                     for (int i = 0; i < 25; i++) {
                         double a = Math.toRadians(rng.nextDouble() * 360);
                         double d = rng.nextDouble() * 20;
@@ -416,7 +416,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                                 double y = 5;
                                 @Override public void run() {
                                     if (y <= 0) {
-                                        
+
                                         Location impact = groundLoc.clone().add(
                                                 Math.cos(rng.nextDouble()*Math.PI*2)*dist, 0,
                                                 Math.sin(rng.nextDouble()*Math.PI*2)*dist);
@@ -425,7 +425,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
                                                 C_VENOM, 1.2f, 8, 0.3, 0.2, 0.3);
                                         particleApi.spawnColoredParticles(impact,
                                                 C_BLACK_TOX, 0.9f, 3, 0.2, 0.15, 0.2);
-                                        
+
                                         for (Entity e : impact.getWorld().getNearbyEntities(impact, 2, 2, 2)) {
                                             if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
                                             LivingEntity le = (LivingEntity) e;
@@ -476,11 +476,11 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
             double dist = Math.max(0.5, e.getLocation().distance(origin));
             double dmg  = Math.max(6, 20 - dist * 0.8);
             le.damage(dmg, p);
-            applyPotion(le, PotionEffectType.POISON,          160, 3); 
+            applyPotion(le, PotionEffectType.POISON,          160, 3);
             applyPotion(le, PotionEffectType.SLOWNESS,        120, 2);
             applyPotion(le, PotionEffectType.WEAKNESS,        100, 1);
             applyPotion(le, PotionEffectType.MINING_FATIGUE,   80, 1);
-            
+
             venomStacks.put(e.getUniqueId(), MAX_STACKS - 1);
             addVenomStack(p, le);
             spawnToxBurst(e.getLocation().clone().add(0, 1, 0), 20);
@@ -501,10 +501,10 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
         int stacks = venomStacks.getOrDefault(uid, 0) + 1;
 
         if (stacks >= MAX_STACKS) {
-            
+
             venomStacks.put(uid, 0);
             target.damage(18, p);
-            applyPotion(target, PotionEffectType.POISON,   60, 4); 
+            applyPotion(target, PotionEffectType.POISON,   60, 4);
             applyPotion(target, PotionEffectType.SLOWNESS,  60, 3);
             spawnStackBurst(target.getLocation().clone().add(0, 1, 0));
             target.getWorld().playSound(target.getLocation(),
@@ -512,7 +512,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
             sendActionBar(p, "§2§l☠ VENOM BURST!");
         } else {
             venomStacks.put(uid, stacks);
-            
+
             particleApi.spawnColoredParticles(target.getLocation().clone().add(0, 2.2, 0),
                     C_ACID, 1.1f, stacks * 2, 0.15, 0.05, 0.15);
         }
@@ -533,7 +533,7 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
 
     private void passiveCounter(DamagedByExecute ex) {
         Player p = ex.getPlayer();
-        
+
         if (!armorActive) return;
         if (isOnCooldown(p_counter, p)) return;
         if (!(ex.getDamager() instanceof LivingEntity)) return;
@@ -605,3 +605,4 @@ public class PoisonPower extends Power implements IdlePower, Removeable {
         particleApi.spawnColoredParticles(loc, C_BLACK_TOX, 0.8f, count / 3, 0.4, 0.4, 0.4);
     }
 }
+

@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.powers;
+package net.trduc.magicabilitiesfork.powers;
 
 public enum PowerType {
     ICE,
@@ -42,5 +42,13 @@ public enum PowerType {
     MAGNETIC,
     DEATH,
     SOUND,
-    SPIKE
+    SPIKE,
+    LUNAR,
+    COSMIC,
+    ASSASSIN,
+    CHRONARCH,
+    PUPPETEER,
+    KAGEMUSHA,
+    VENOM_PALETTE
 }
+

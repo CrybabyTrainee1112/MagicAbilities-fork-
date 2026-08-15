@@ -1,11 +1,11 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.ConsumeExecute;
-import net.trduc.magicabilities.powers.executions.Execute;
-import net.trduc.magicabilities.powers.executions.RightClickExecute;
-import net.trduc.magicabilities.powers.executions.SneakExecute;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.ConsumeExecute;
+import net.trduc.magicabilitiesfork.powers.executions.Execute;
+import net.trduc.magicabilitiesfork.powers.executions.RightClickExecute;
+import net.trduc.magicabilitiesfork.powers.executions.SneakExecute;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -21,12 +21,11 @@ import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class PotatoPower extends Power {
     private static final String potato_get = "potato.get";
@@ -116,18 +115,17 @@ public class PotatoPower extends Power {
             int i = 0;
             @Override
             public void run() {
-                if (p == null){
+                if (!p.isOnline()){
                     as.remove();
                     cancel();
+                    return;
                 }
 
                 as.teleport(as.getLocation().add(v.clone().multiply(s)));
-                for (Entity entity : as.getLocation().getChunk().getEntities()){
+                for (Entity entity : as.getLocation().getWorld().getNearbyEntities(as.getLocation(), 1.5, 1.5, 1.5)){
                     if (!as.isDead()){
-                        if (entity.equals(as)) continue;
+                        if (entity.equals(as) || entity.equals(p)) continue;
                         if (!(entity instanceof LivingEntity)) continue;
-                        if (entity.equals(p)) continue;
-                        if (as.getLocation().distanceSquared(entity.getLocation()) > 3.5) continue;
                         ((LivingEntity) entity).damage(2.5, p);
                         as.remove();
                         cancel();
@@ -167,3 +165,4 @@ public class PotatoPower extends Power {
         }
     }
 }
+

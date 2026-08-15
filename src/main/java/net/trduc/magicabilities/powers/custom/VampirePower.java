@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.*;
@@ -12,12 +12,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown;
 
 public class VampirePower extends Power implements IdlePower, Removeable {
 
@@ -29,7 +29,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
     private static final String v_mist    = "vampire.mist";
     private static final String v_leap    = "vampire.leap";
     private static final String v_moon    = "vampire.moon";
-    private static final String v_instinct= "vampire.instinct"; 
+    private static final String v_instinct= "vampire.instinct";
 
     private int XP_MOON;
 
@@ -52,12 +52,12 @@ public class VampirePower extends Power implements IdlePower, Removeable {
 
     @Override
     public void executePower(Execute ex) {
-        
+
         if (ex instanceof DealDamageExecute) {
             passiveLifesteal((DealDamageExecute) ex);
             return;
         }
-        
+
         if (ex instanceof DamagedByExecute) {
             passiveInstinct((DamagedByExecute) ex);
             return;
@@ -296,7 +296,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
                     bat.teleport(bat.getLocation().add(fDir));
 
                     Location loc = bat.getLocation();
-                    
+
                     double wing = Math.sin(t * 0.8) * 0.3;
                     particleApi.spawnColoredParticles(loc.clone().add(wing, 0, 0), C_BLACK_VOID, 0.9f, 2, 0.05, 0.05, 0.05);
                     particleApi.spawnColoredParticles(loc.clone().add(-wing, 0, 0), C_BLACK_VOID, 0.9f, 2, 0.05, 0.05, 0.05);
@@ -325,7 +325,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_BREAK, 0.6f, 0.3f);
 
         applyPotion(p, PotionEffectType.INVISIBILITY, 80, 0);
-        applyPotion(p, PotionEffectType.RESISTANCE,   80, 4); 
+        applyPotion(p, PotionEffectType.RESISTANCE,   80, 4);
         applyPotion(p, PotionEffectType.SPEED,        80, 2);
         sendActionBar(p, "§4§l✦ Mist Form ✦");
 
@@ -334,13 +334,13 @@ public class VampirePower extends Power implements IdlePower, Removeable {
         mistTask = new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
-                if (t >= 60 || !p.isOnline()) { 
+                if (t >= 60 || !p.isOnline()) {
                     exitMistForm(p);
                     cancel();
                     return;
                 }
                 Location loc = p.getLocation().clone().add(0, 1, 0);
-                
+
                 for (int i = 0; i < 8; i++) {
                     double a = Math.toRadians(rng.nextDouble() * 360);
                     double d = rng.nextDouble() * 1.0;
@@ -365,7 +365,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
         removePotion(p, PotionEffectType.SPEED);
         spawnBloodBurst(p.getLocation().clone().add(0, 1, 0), 40);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 0.8f, 1.2f);
-        
+
         for (Entity e : p.getWorld().getNearbyEntities(p.getLocation(), 2.5, 2.5, 2.5)) {
             if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
             ((LivingEntity) e).damage(8, p);
@@ -392,7 +392,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
         spawnBloodBurst(dest.clone().add(0, 1, 0), 20);
         p.getWorld().playSound(dest, Sound.ENTITY_BAT_HURT, 0.8f, 0.5f);
 
-        double dmg = isNight(p) ? 20 : 14; 
+        double dmg = isNight(p) ? 20 : 14;
         target.damage(dmg, p);
         safeHeal(p, dmg * 0.5);
         applyPotion(target, PotionEffectType.SLOWNESS, 50, 3);
@@ -418,17 +418,17 @@ public class VampirePower extends Power implements IdlePower, Removeable {
             }.runTaskLater(magicPlugin, fi * 4L);
         }
 
-        applyPotion(p, PotionEffectType.STRENGTH,     220, 2); 
-        applyPotion(p, PotionEffectType.SPEED,        220, 2); 
-        applyPotion(p, PotionEffectType.RESISTANCE,   220, 0); 
-        applyPotion(p, PotionEffectType.NIGHT_VISION, 220, 0);
+        applyPotion(p, PotionEffectType.STRENGTH,     220, 2);
+        applyPotion(p, PotionEffectType.SPEED,        220, 2);
+        applyPotion(p, PotionEffectType.RESISTANCE,   220, 0);
+        applyPotion(p, PotionEffectType.NIGHT_VISION, 420, 0);
 
         Random rng = new Random();
 
         moonTask = new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
-                if (t >= 200 || !p.isOnline()) { 
+                if (t >= 200 || !p.isOnline()) {
                     moonEnd(p);
                     cancel();
                     return;
@@ -442,7 +442,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
                     if (i % 3 == 0)
                         particleApi.spawnColoredParticles(pt, C_BLACK_VOID, 0.9f, 1, 0.04, 0.04, 0.04);
                 }
-                
+
                 particleCircle(p.getLocation().clone().add(0, 0.08, 0),
                         0.8, C_BLOOD, 1.0f, 8, t * 20);
 
@@ -504,7 +504,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
 
     private void passiveInstinct(DamagedByExecute ex) {
         Player p = ex.getPlayer();
-        if (p.getHealth() > 8) return; 
+        if (p.getHealth() > 8) return;
         if (isOnCooldown(v_instinct, p)) return;
         LivingEntity nearest = getNearestTarget(p, 8);
         if (nearest == null) return;
@@ -530,7 +530,7 @@ public class VampirePower extends Power implements IdlePower, Removeable {
                     applyPotion(p, PotionEffectType.SPEED,        25, 1);
                     applyPotion(p, PotionEffectType.STRENGTH,     25, 0);
                 } else {
-                    
+
                     if (p.getLocation().getBlock().getLightFromSky() > 12) {
                         applyPotion(p, PotionEffectType.WEAKNESS,        25, 0);
                         applyPotion(p, PotionEffectType.MINING_FATIGUE,  25, 0);
@@ -586,3 +586,4 @@ public class VampirePower extends Power implements IdlePower, Removeable {
         return !(t < 12300 || t > 23850);
     }
 }
+

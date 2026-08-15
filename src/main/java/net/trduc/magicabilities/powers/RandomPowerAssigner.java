@@ -1,60 +1,79 @@
-package net.trduc.magicabilities.powers;
+package net.trduc.magicabilitiesfork.powers;
 
-import java.util.Arrays;
+import net.trduc.magicabilitiesfork.data.PlayerData;
+import org.bukkit.configuration.file.FileConfiguration;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class RandomPowerAssigner {
+public final class RandomPowerAssigner {
 
-    private static final List<PowerType> POOL = Collections.unmodifiableList(Arrays.asList(
-            PowerType.ICE,
-            PowerType.LIGHTNING,
-            PowerType.SHOGUN,
-            PowerType.FIRE,
-            PowerType.WITCHER,
-            PowerType.NATURE,
-            PowerType.PHOENIX,
-            PowerType.TWILIGHT_MIRAGE,
-            PowerType.ETERNITY,
-            PowerType.CURSEWEAVER,
-            PowerType.THUNDER_GOD,
-            PowerType.WIND,
-            PowerType.DEMON,
-            PowerType.WATER,
-            PowerType.WARP,
-            PowerType.WITHER,
-            PowerType.ICE_DRAGON,
-            PowerType.WOOD_DRAGON,
-            PowerType.SNOWPARTING_BLADE,
-            PowerType.METEOR_LORD,
-            PowerType.CULTIVATOR,
-            PowerType.BLOOD,
-            PowerType.CRYSTAL,
-            PowerType.EARTH,
-            PowerType.MAGNETIC,
-            PowerType.UNSTABLE,
-            PowerType.HUASHAN,
-            PowerType.DEMON_LORD,
-            PowerType.GRAVITY,
-            PowerType.SHOCKWAVE,
-            PowerType.PORTAL,
-            PowerType.CLOUD,
-            PowerType.VAMPIRE,
-            PowerType.POISON,
-            PowerType.AIR,
-            PowerType.DEATH,
-            PowerType.SOUND,
-            PowerType.SPIKE
-    ));
-
+    private static List<PowerType> pool = Collections.emptyList();
     private static final Random RNG = new Random();
 
-    public static PowerType randomPower() {
-        return POOL.get(RNG.nextInt(POOL.size()));
+    private RandomPowerAssigner() {}
+
+    public static void loadPool(FileConfiguration config) {
+        List<PowerType> excluded = new ArrayList<>();
+        for (String s : config.getStringList("exclude")) {
+            try {
+                excluded.add(PowerType.valueOf(s.trim().toUpperCase()));
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        List<PowerType> loaded = new ArrayList<>();
+        for (String s : config.getStringList("pool")) {
+            try {
+                PowerType pt = PowerType.valueOf(s.trim().toUpperCase());
+                if (!excluded.contains(pt) && !loaded.contains(pt)) {
+                    loaded.add(pt);
+                }
+            } catch (IllegalArgumentException ignored) {}
+        }
+        pool = Collections.unmodifiableList(loaded);
+    }
+
+    public static PowerType randomPower(PlayerData pd) {
+        List<PowerType> bag = parseBag(pd.getRandomBag());
+
+        if (bag.isEmpty()) {
+            bag = new ArrayList<>(pool);
+        }
+
+        if (bag.isEmpty()) {
+            pd.setRandomBag("");
+            return PowerType.NONE;
+        }
+
+        PowerType chosen = bag.remove(RNG.nextInt(bag.size()));
+        pd.setRandomBag(serializeBag(bag));
+        return chosen;
+    }
+
+    private static List<PowerType> parseBag(String raw) {
+        List<PowerType> list = new ArrayList<>();
+        if (raw == null || raw.trim().isEmpty()) return list;
+        for (String s : raw.split(",")) {
+            if (s.trim().isEmpty()) continue;
+            try {
+                list.add(PowerType.valueOf(s.trim()));
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return list;
+    }
+
+    private static String serializeBag(List<PowerType> bag) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bag.size(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(bag.get(i).name());
+        }
+        return sb.toString();
     }
 
     public static List<PowerType> getPool() {
-        return POOL;
+        return pool;
     }
 }

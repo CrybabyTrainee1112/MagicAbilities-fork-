@@ -1,8 +1,8 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffectType;
@@ -11,19 +11,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
 
-/**
- * SpikePower — "Iron Tendrils"
- * A swarm of steel-spike tendrils erupts from behind the caster's back and
- * lashes out toward enemies. All abilities revolve around this single visual
- * theme: dark metallic tendrils that branch from one point and converge on
- * their target(s).
- */
 public class SpikePower extends Power implements Removeable {
 
     private static final String CD_STRIKE = "spike.strike";
@@ -39,7 +32,6 @@ public class SpikePower extends Power implements Removeable {
 
     private final Random rng = new Random();
 
-    /** Active wall tendrils so they can be cancelled by remove(). */
     private BukkitRunnable wallTask  = null;
     private BukkitRunnable stormTask = null;
 
@@ -63,10 +55,6 @@ public class SpikePower extends Power implements Removeable {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // 1) TENDRIL STRIKE — 6 tendrils erupt from behind the back and
-    //    converge on a single look-direction target within r=6.
-    // ──────────────────────────────────────────────────────────────────
     private void tendrilStrike(Player p) {
         if (onCd(CD_STRIKE, p, this)) return;
 
@@ -84,8 +72,6 @@ public class SpikePower extends Power implements Removeable {
             final int idx   = i;
             final int delay = i * 2;
 
-            // Each tendril gets its own random lateral offset so they look like
-            // they branch apart before converging back on the target.
             final double sideOff = (rng.nextDouble() - 0.5) * 2.4;
             final double vertOff = (rng.nextDouble() - 0.5) * 1.6;
 
@@ -101,7 +87,6 @@ public class SpikePower extends Power implements Removeable {
         addCd(CD_STRIKE, p);
     }
 
-    /** Animates a single curved tendril from origin to the target's location, dealing damage + pulling the target back on hit. */
     private void fireTendril(Player p, Location origin, LivingEntity target, double sideOff, double vertOff, double damage, int idx) {
         final Vector right = p.getLocation().getDirection().clone().setY(0).normalize();
         final Vector side  = new Vector(-right.getZ(), 0, right.getX());
@@ -114,8 +99,7 @@ public class SpikePower extends Power implements Removeable {
                 if (t > steps || !target.isValid() || target.isDead()) { cancel(); return; }
 
                 double progress = (double) t / steps;
-                // Mid-flight the tendril bulges out sideways (branch), then
-                // collapses back onto the target's location at the end.
+
                 double bulge = Math.sin(progress * Math.PI) * 1.0;
 
                 Location targetPoint = target.getLocation().clone().add(0, 1, 0);
@@ -148,10 +132,6 @@ public class SpikePower extends Power implements Removeable {
         }.runTaskTimer(magicPlugin, 0L, 1L);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // 2) TENDRIL BURST — tendrils erupt in a 360° ring around the caster,
-    //    knocking back and damaging everything nearby.
-    // ──────────────────────────────────────────────────────────────────
     private void tendrilBurst(Player p) {
         if (onCd(CD_BURST, p, this)) return;
 
@@ -199,10 +179,6 @@ public class SpikePower extends Power implements Removeable {
         addCd(CD_BURST, p);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // 3) TENDRIL GRASP — a single long-range tendril that latches onto a
-    //    target and hauls it back toward the caster.
-    // ──────────────────────────────────────────────────────────────────
     private void tendrilGrasp(Player p) {
         if (onCd(CD_GRASP, p, this)) return;
 
@@ -257,10 +233,6 @@ public class SpikePower extends Power implements Removeable {
         addCd(CD_GRASP, p);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // 4) TENDRIL WALL — a row of tendrils erupts in front of the caster
-    //    and stays standing, damaging anyone who walks through it.
-    // ──────────────────────────────────────────────────────────────────
     private void tendrilWall(Player p) {
         if (onCd(CD_WALL, p, this)) return;
         if (wallTask != null) { wallTask.cancel(); wallTask = null; }
@@ -316,7 +288,6 @@ public class SpikePower extends Power implements Removeable {
         addCd(CD_WALL, p);
     }
 
-    /** Grows a single static tendril upward from origin toward a fixed destination point (used by the wall). */
     private void riseTendril(Location origin, Location dest) {
         new BukkitRunnable() {
             int t = 0;
@@ -339,10 +310,6 @@ public class SpikePower extends Power implements Removeable {
         }.runTaskTimer(magicPlugin, 0L, 1L);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // 5) TENDRIL STORM (Ultimate) — a relentless barrage of tendrils
-    //    lashes out toward the target's location for several seconds.
-    // ──────────────────────────────────────────────────────────────────
     private void tendrilStorm(Player p) {
         if (onCd(CD_STORM, p, this)) return;
         if (stormTask != null) { stormTask.cancel(); stormTask = null; }
@@ -384,11 +351,6 @@ public class SpikePower extends Power implements Removeable {
         addCd(CD_STORM, p);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // Shared helpers
-    // ──────────────────────────────────────────────────────────────────
-
-    /** The common point behind the caster's back where all tendrils erupt from. */
     private Location originBehindBack(Player p) {
         Vector back = p.getLocation().getDirection().clone().setY(0).normalize().multiply(-0.6);
         return p.getLocation().clone().add(back).add(0, 1.2, 0);
@@ -412,3 +374,4 @@ public class SpikePower extends Power implements Removeable {
         }
     }
 }
+

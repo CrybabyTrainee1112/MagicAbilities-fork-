@@ -1,26 +1,25 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class EarthPower extends Power implements IdlePower, Removeable {
 
@@ -36,9 +35,9 @@ public class EarthPower extends Power implements IdlePower, Removeable {
     private static final Color C_DARK  = Color.fromRGB(60,  40,  20);
 
     private boolean fortressActive = false;
-    
+
     private final List<Block> tombBlocks = new ArrayList<>();
-    
+
     private double slamStartY = -1;
 
     private final Random rng = new Random();
@@ -83,7 +82,7 @@ public class EarthPower extends Power implements IdlePower, Removeable {
                 if (radius > 7.5) { cancel(); return; }
                 particleCircle(ground.clone().add(0, 0.08, 0), radius, C_DIRT,  2f, 20, t * 18);
                 particleCircle(ground.clone().add(0, 0.08, 0), radius, C_STONE, 1.5f, 10, -t * 18);
-                
+
                 for (int i = 0; i < 3; i++) {
                     double a = rng.nextDouble() * Math.PI * 2;
                     Location dust = ground.clone().add(Math.cos(a)*radius*0.8, 0, Math.sin(a)*radius*0.8);
@@ -100,7 +99,7 @@ public class EarthPower extends Power implements IdlePower, Removeable {
             if (!(e instanceof LivingEntity) || e.equals(p)) continue;
             LivingEntity le = (LivingEntity) e;
             le.damage(7.0, p);
-            
+
             Vector kb = knockbackVector(p.getLocation(), le, 1.0, 0.55);
             le.setVelocity(kb);
             spawnEarthBurst(le.getLocation().add(0, 0.5, 0), 8);
@@ -117,8 +116,8 @@ public class EarthPower extends Power implements IdlePower, Removeable {
 
         fortressActive = true;
 
-        applyPotion(p, PotionEffectType.RESISTANCE,  20 * 6, 1); 
-        applyPotion(p, PotionEffectType.ABSORPTION,  20 * 6, 2); 
+        applyPotion(p, PotionEffectType.RESISTANCE,  20 * 6, 1);
+        applyPotion(p, PotionEffectType.ABSORPTION,  20 * 6, 2);
 
         new BukkitRunnable() {
             @Override public void run() {
@@ -182,14 +181,14 @@ public class EarthPower extends Power implements IdlePower, Removeable {
                     particleApi.spawnColoredParticles(ring,
                             rng.nextBoolean() ? C_STONE : C_DARK, 3f, 1, 0.05, 0.05, 0.05);
                 }
-                
+
                 particleApi.spawnColoredParticles(bl, C_DIRT, 1.5f, 2, 0.2, 0.1, 0.2);
 
                 for (Entity e : bl.getChunk().getEntities()) {
                     if (e instanceof ArmorStand || e.equals(p) || hit.contains(e)) continue;
                     if (e instanceof LivingEntity && bl.distanceSquared(e.getLocation()) <= 5.0) {
                         ((LivingEntity) e).damage(11.0, p);
-                        
+
                         Vector kb = knockbackVector(p.getLocation(), e, 1.5, 0.4);
                         e.setVelocity(kb);
                         hit.add(e);
@@ -234,7 +233,7 @@ public class EarthPower extends Power implements IdlePower, Removeable {
                 }
             }
         }
-        
+
         Block lid = base.clone().add(0, 3, 0).getBlock();
         if (lid.getType() == Material.AIR) { lid.setType(Material.STONE); placed.add(lid); tombBlocks.add(lid); }
 
@@ -300,10 +299,10 @@ public class EarthPower extends Power implements IdlePower, Removeable {
                     cancel();
 
                     double fallHeight = Math.max(0, slamStartY - p.getLocation().getY() + 2);
-                    
+
                     double actualFall = Math.abs(p.getLocation().getY() - slamStartY) + 2;
                     double damage = 8.0 + actualFall * 1.5;
-                    damage = Math.min(damage, 28.0); 
+                    damage = Math.min(damage, 28.0);
 
                     final Location impact = p.getLocation().clone();
 
@@ -363,16 +362,16 @@ public class EarthPower extends Power implements IdlePower, Removeable {
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
 
-                applyPotionSilent(p, PotionEffectType.STRENGTH,  30, 0); 
-                applyPotionSilent(p, PotionEffectType.SLOWNESS,  30, 0); 
+                applyPotionSilent(p, PotionEffectType.STRENGTH,  30, 0);
+                applyPotionSilent(p, PotionEffectType.SLOWNESS,  30, 0);
 
                 if (isAuraEnabled(p)) {
-                    
+
                     particleCircle(p.getLocation().clone().add(0, 0.07, 0),
                             0.65, C_DIRT, 1.5f, 7, t * 18);
                     particleCircle(p.getLocation().clone().add(0, 0.07, 0),
                             0.65, C_STONE, 1f, 5, -t * 18 + 25);
-                    
+
                     if (t % 3 == 0) {
                         double a = rng.nextDouble() * Math.PI * 2;
                         Location pebble = p.getLocation().clone().add(
@@ -415,3 +414,4 @@ public class EarthPower extends Power implements IdlePower, Removeable {
         particleApi.spawnColoredParticles(loc, C_SAND,  2.5f, 2,         0.2, 0.2, 0.2);
     }
 }
+

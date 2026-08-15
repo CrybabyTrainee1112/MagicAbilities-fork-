@@ -1,16 +1,16 @@
-package net.trduc.magicabilities.players;
+package net.trduc.magicabilitiesfork.players;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.PowerType;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.IdleExecute;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.PowerType;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.IdleExecute;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
 
 public class PowerPlayer {
     public static final HashMap<Player, PowerPlayer> players = new HashMap<>();
@@ -91,3 +91,4 @@ public class PowerPlayer {
         this.auraEnabled = auraEnabled;
     }
 }
+

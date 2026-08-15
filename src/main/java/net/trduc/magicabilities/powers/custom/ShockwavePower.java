@@ -1,24 +1,22 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class ShockwavePower extends Power implements IdlePower, Removeable {
 
@@ -46,7 +44,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
 
     @Override
     public void executePower(Execute ex) {
-        
+
         if (ex instanceof DamagedByExecute) {
             shockwaveCounter((DamagedByExecute) ex);
             return;
@@ -184,7 +182,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
                 }
 
                 if (diving) {
-                    
+
                     particleApi.spawnParticles(p.getLocation().add(0, 1, 0),
                             Particle.CLOUD, 10, 0.25, 0.1, 0.25, 0.05);
                     particleApi.spawnColoredParticles(p.getLocation().add(0, 1, 0),
@@ -259,7 +257,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
                         safeRemove(proj); cancel(); return;
                     }
                 }
-                
+
                 if (!loc.getBlock().isPassable() || loc.getBlock().isLiquid()) {
                     concussionExplode(loc, p, damageMult);
                     safeRemove(proj); cancel(); return;
@@ -283,7 +281,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
             double dist = Math.max(0.5, e.getLocation().distance(loc));
             double dmg = Math.max(5, 16 * mult - dist * 2.0);
             ((LivingEntity) e).damage(dmg, p);
-            
+
             applyPotion((LivingEntity) e, PotionEffectType.NAUSEA, 80, 1);
             applyPotion((LivingEntity) e, PotionEffectType.SLOWNESS, 40, 1);
             Vector kb = e.getLocation().subtract(loc).toVector().normalize().multiply(2.0).setY(0.45);
@@ -375,7 +373,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
                 }
 
                 double radius = 2.2;
-                
+
                 for (int i = 0; i < 16; i++) {
                     double a = Math.toRadians(i * 22.5 + t * 6);
                     double x = Math.cos(a) * radius;
@@ -449,7 +447,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
 
     private void shockwaveCounter(DamagedByExecute ex) {
         Player p = ex.getPlayer();
-        if (addCdFixed_safe(sw_counter, p, 4.0)) return;   
+        if (addCdFixed_safe(sw_counter, p, 4.0)) return;
 
         Location loc = p.getLocation().clone().add(0, 1, 0);
         p.getWorld().playSound(loc, Sound.ENTITY_WARDEN_SONIC_BOOM, 0.5f, 1.8f);
@@ -466,7 +464,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
     }
 
     private boolean addCdFixed_safe(String key, Player p, double seconds) {
-        if (net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown(key, p)) return true;
+        if (net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown(key, p)) return true;
         addCdFixed(key, p, seconds);
         return false;
     }
@@ -478,7 +476,7 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
             @Override
             public void run() {
                 if (!p.isOnline()) { cancel(); return; }
-                
+
                 if (isAuraEnabled(p)) {
                     particleApi.spawnColoredParticles(
                             p.getLocation().clone().add(0, 0.08, 0),
@@ -516,3 +514,4 @@ public class ShockwavePower extends Power implements IdlePower, Removeable {
         }
     }
 }
+

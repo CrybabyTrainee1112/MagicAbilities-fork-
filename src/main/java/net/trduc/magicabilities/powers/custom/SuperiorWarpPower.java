@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
 import org.bukkit.entity.Player;
 
@@ -7,3 +7,4 @@ public class SuperiorWarpPower extends WarpPower{
         super(owner);
     }
 }
+

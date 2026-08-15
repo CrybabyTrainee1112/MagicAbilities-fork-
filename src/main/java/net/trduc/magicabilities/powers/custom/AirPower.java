@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffectType;
@@ -12,13 +12,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown;
 
 public class AirPower extends Power implements IdlePower, Removeable {
 
@@ -30,7 +29,7 @@ public class AirPower extends Power implements IdlePower, Removeable {
     private static final String a_field   = "air.field";
     private static final String a_step    = "air.step";
     private static final String a_collapse= "air.collapse";
-    private static final String a_counter = "air.counter";   
+    private static final String a_counter = "air.counter";
 
     private int XP_COLLAPSE;
 
@@ -159,7 +158,7 @@ public class AirPower extends Power implements IdlePower, Removeable {
             double dist = Math.max(0.5, e.getLocation().distance(loc));
             double dmg  = Math.max(3, damage - dist * 1.5);
             ((LivingEntity) e).damage(dmg, p);
-            applyPotion((LivingEntity) e, PotionEffectType.LEVITATION, 30, 1); 
+            applyPotion((LivingEntity) e, PotionEffectType.LEVITATION, 30, 1);
             applyPotion((LivingEntity) e, PotionEffectType.SLOWNESS,   25, 0);
             Vector kb = e.getLocation().subtract(loc).toVector().normalize().multiply(2.2).setY(0.5);
             e.setVelocity(isVecFinite(kb) ? kb : new Vector(0, 0.5, 0));
@@ -185,8 +184,8 @@ public class AirPower extends Power implements IdlePower, Removeable {
         ArmorStand slash = spawnProjectile(p);
         Vector dir = p.getEyeLocation().getDirection().normalize();
         Random rng = new Random();
-        double kbMult = 1.2 + idx * 0.6; 
-        double dmg    = 7 + idx * 3;     
+        double kbMult = 1.2 + idx * 0.6;
+        double dmg    = 7 + idx * 3;
         Set<Entity> hit = new HashSet<>();
 
         new BukkitRunnable() {
@@ -241,8 +240,8 @@ public class AirPower extends Power implements IdlePower, Removeable {
                     return;
                 }
 
-                double r = 2.5 - t * 0.04; 
-                
+                double r = 2.5 - t * 0.04;
+
                 particleRing3D(center, Math.max(0.3, r), C_SKY_BLUE,  1.2f, 20, t * 10, 0.4, t);
                 particleRing3D(center, Math.max(0.3, r * 0.7), C_ICE_BLUE, 1.1f, 16, -(t * 12), 0.3, t);
                 particleCircle(center, Math.max(0.2, r * 0.5), C_CYAN, 1.0f, 12, t * 15);
@@ -359,7 +358,7 @@ public class AirPower extends Power implements IdlePower, Removeable {
                     cancel();
                     return;
                 }
-                
+
                 for (int i = 0; i < 12; i++) {
                     double a = Math.toRadians(i * 30 + t * 11);
                     Location pt = p.getLocation().clone().add(Math.cos(a)*1.1, 0.07, Math.sin(a)*1.1);
@@ -395,10 +394,10 @@ public class AirPower extends Power implements IdlePower, Removeable {
             new BukkitRunnable() {
                 @Override public void run() {
                     if (!p.isOnline()) return;
-                    
+
                     Location from = p.getLocation().clone();
                     Location dest = from.clone().add(dir.clone().multiply(5));
-                    
+
                     for (int s = 5; s >= 1; s--) {
                         Location try_ = from.clone().add(dir.clone().multiply(s));
                         try_.setY(try_.getY() + 0.1);
@@ -444,8 +443,8 @@ public class AirPower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { collapseActive = false; cancel(); return; }
 
                 if (t < 50) {
-                    double intensity = (double) t / 50; 
-                    double r = 12 - intensity * 4;      
+                    double intensity = (double) t / 50;
+                    double r = 12 - intensity * 4;
 
                     for (int i = 0; i < 30; i++) {
                         double a = Math.toRadians(rng.nextDouble() * 360);
@@ -457,7 +456,7 @@ public class AirPower extends Power implements IdlePower, Removeable {
                         particleApi.spawnColoredParticles(mid,
                                 AIR_COLS[rng.nextInt(AIR_COLS.length)], 1.1f, 1, 0.1, 0.1, 0.1);
                     }
-                    
+
                     particleRing3D(center, Math.max(0.3, 3 - intensity * 2.5),
                             C_SKY_BLUE, 1.3f, 20, t * 15, 0.5, t);
                     particleRing3D(center, Math.max(0.2, 2 - intensity * 1.8),
@@ -520,10 +519,10 @@ public class AirPower extends Power implements IdlePower, Removeable {
             double dist = Math.max(0.5, e.getLocation().distance(center));
             double dmg  = Math.max(10, 35 - dist * 1.8);
             ((LivingEntity) e).damage(dmg, p);
-            applyPotion((LivingEntity) e, PotionEffectType.LEVITATION, 60, 3);  
-            applyPotion((LivingEntity) e, PotionEffectType.BLINDNESS,  80, 0);  
-            applyPotion((LivingEntity) e, PotionEffectType.SLOWNESS,   100, 3); 
-            
+            applyPotion((LivingEntity) e, PotionEffectType.LEVITATION, 60, 3);
+            applyPotion((LivingEntity) e, PotionEffectType.BLINDNESS,  80, 0);
+            applyPotion((LivingEntity) e, PotionEffectType.SLOWNESS,   100, 3);
+
             new BukkitRunnable() {
                 @Override public void run() {
                     Vector kb = e.getLocation().subtract(center).toVector()
@@ -629,3 +628,4 @@ public class AirPower extends Power implements IdlePower, Removeable {
         particleApi.spawnParticles(loc, Particle.CLOUD, count / 3, 0.3, 0.25, 0.3, 0.05);
     }
 }
+

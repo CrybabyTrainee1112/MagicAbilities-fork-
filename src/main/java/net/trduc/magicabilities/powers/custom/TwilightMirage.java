@@ -1,10 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
@@ -17,13 +16,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class TwilightMirage extends Power implements IdlePower {
     private static final String tm_shriek   = "twilight-mirage.shriek-transition";
@@ -31,7 +29,7 @@ public class TwilightMirage extends Power implements IdlePower {
     private static final String tm_missile  = "twilight-mirage.missile";
     private static final String tm_healing  = "twilight-mirage.healing";
     private static final String tm_eclipse  = "twilight-mirage.eclipse";
-    private static final String tm_neardeath = "TM-0";
+    private static final String tm_neardeath = "twilight-mirage.neardeath";
     private static final Color C_TM_PURPLE  = Color.fromRGB(180,  60, 255);
     private static final Color C_TM_TEAL    = Color.fromRGB(  0, 245, 215);
     private static final Color C_TM_LAVENDER= Color.fromRGB(230, 190, 255);
@@ -475,12 +473,14 @@ public class TwilightMirage extends Power implements IdlePower {
                 if (p.hasPotionEffect(PotionEffectType.WITHER))
                     p.removePotionEffect(PotionEffectType.WITHER);
                 Location loc = p.getLocation().clone().add(0, 0.06, 0);
-                for (int i = 0; i < 6; i++) {
-                    double a = Math.toRadians(i * 60 + t * 8);
-                    Location lp = loc.clone().add(Math.cos(a)*0.9, 0, Math.sin(a)*0.9);
-                    particleApi.spawnColoredParticles(lp, i%2==0 ? C_TM_PURPLE : C_TM_TEAL, 0.85f, 1, 0.03, 0.03, 0.03);
+                if (isAuraEnabled(p)) {
+                    for (int i = 0; i < 6; i++) {
+                        double a = Math.toRadians(i * 60 + t * 8);
+                        Location lp = loc.clone().add(Math.cos(a)*0.9, 0, Math.sin(a)*0.9);
+                        particleApi.spawnColoredParticles(lp, i%2==0 ? C_TM_PURPLE : C_TM_TEAL, 0.85f, 1, 0.03, 0.03, 0.03);
+                    }
+                    particleApi.spawnColoredParticles(loc, C_TM_PURPLE, 0.85f, 1, 0.28, 0.01, 0.28);
                 }
-                particleApi.spawnColoredParticles(loc, C_TM_PURPLE, 0.85f, 1, 0.28, 0.01, 0.28);
 
                 t++;
             }
@@ -510,3 +510,4 @@ public class TwilightMirage extends Power implements IdlePower {
         return p.getWorld().isClearWeather();
     }
 }
+

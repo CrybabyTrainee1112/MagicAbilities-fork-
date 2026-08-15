@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.misc;
+package net.trduc.magicabilitiesfork.misc;
 
 import org.bukkit.Color;
 import org.bukkit.Location;

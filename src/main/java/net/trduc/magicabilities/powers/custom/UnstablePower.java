@@ -1,9 +1,8 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Damageable;
@@ -22,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class UnstablePower extends WarpPower implements IdlePower {
     private static final String warp_default = "warp.default";
@@ -257,8 +255,9 @@ public class UnstablePower extends WarpPower implements IdlePower {
     }
 
     private void switchDim(Player p) {
-        List<World> worlds = Bukkit.getWorlds();
+        List<World> worlds = new ArrayList<>(Bukkit.getWorlds());
         worlds.remove(p.getWorld());
+        if (worlds.isEmpty()) return;
         Location d = new Location(worlds.get(random.nextInt(worlds.size())), p.getLocation().getX(), p.getLocation().getY(), p.getLocation().getZ()).add(0, 1, 0);
         ArrayList<Entity> entities = new ArrayList<>();
         Location l = p.getLocation().clone().add(0, 1, 0);
@@ -304,8 +303,9 @@ public class UnstablePower extends WarpPower implements IdlePower {
                     p.getWorld().spawn(p.getLocation(), LightningStrike.class);
                 }
 
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
-                        Particle.ENCHANT, 5, 0.3, 0.3, 0.3, 0.01);
+                if (isAuraEnabled(p))
+                    particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
+                            Particle.ENCHANT, 5, 0.3, 0.3, 0.3, 0.01);
             }
         };
         r.runTaskTimer(magicPlugin, 0, 40);
@@ -326,3 +326,4 @@ public class UnstablePower extends WarpPower implements IdlePower {
         }
     }
 }
+

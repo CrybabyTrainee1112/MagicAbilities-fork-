@@ -1,8 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -12,13 +13,13 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
-public class BloodPower extends Power implements IdlePower {
+public class BloodPower extends Power implements IdlePower, Removeable {
 
     private static final String CD_SCYTHE    = "blood.scythe";
     private static final String CD_PUPPET    = "blood.puppet";
@@ -33,6 +34,7 @@ public class BloodPower extends Power implements IdlePower {
     private final Random rng = new Random();
 
     private boolean veilActive = false;
+    private BukkitRunnable veilTask = null;
     private final Set<UUID> veilBlinded = new HashSet<>();
 
     public BloodPower(Player owner) {
@@ -82,9 +84,9 @@ public class BloodPower extends Power implements IdlePower {
                 @Override public void run() {
                     if (blade.isDead() || t > 22) { safeRemove(blade); cancel(); return; }
                     blade.teleport(blade.getLocation().add(dir.clone().multiply(1.2)));
-                    
+
                     particleApi.spawnColoredParticles(blade.getLocation(), C_BRIGHT, 1.2f, 2, 0.08, 0.08, 0.08);
-                    
+
                     for (Entity e : blade.getLocation().getChunk().getEntities()) {
                         if (e instanceof ArmorStand || e.equals(p) || hit.contains(e)) continue;
                         if (e instanceof LivingEntity && blade.getLocation().distanceSquared(e.getLocation()) <= 3.5) {
@@ -117,14 +119,14 @@ public class BloodPower extends Power implements IdlePower {
         final LivingEntity target = puppet;
 
         target.setVelocity(new Vector(0, 0.8, 0));
-        applyPotion(target, PotionEffectType.SLOWNESS, 20, 10); 
+        applyPotion(target, PotionEffectType.SLOWNESS, 20, 10);
 
         particleLine(p.getLocation().add(0,1,0), target.getLocation().add(0,1,0), 0.4, C_MID, 2f);
 
         new BukkitRunnable() {
             @Override public void run() {
                 if (!target.isValid()) return;
-                
+
                 LivingEntity throwTo = null;
                 double best = 20;
                 for (Entity e : target.getWorld().getNearbyEntities(target.getLocation(), 12, 12, 12)) {
@@ -137,7 +139,7 @@ public class BloodPower extends Power implements IdlePower {
                 if (throwTo != null) {
                     throwVec = throwTo.getLocation().subtract(target.getLocation()).toVector().normalize().multiply(1.8).add(new Vector(0, 0.3, 0));
                 } else {
-                    
+
                     throwVec = p.getEyeLocation().getDirection().clone().multiply(1.6).add(new Vector(0, 0.3, 0));
                 }
 
@@ -180,7 +182,7 @@ public class BloodPower extends Power implements IdlePower {
             int t = 0;
             @Override public void run() {
                 if (t >= 3) {
-                    
+
                     for (int ring = 1; ring <= 3; ring++) {
                         final int r = ring;
                         new BukkitRunnable() {
@@ -230,7 +232,7 @@ public class BloodPower extends Power implements IdlePower {
 
         p.getWorld().playSound(center, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 0.3f);
 
-        new BukkitRunnable() {
+        veilTask = new BukkitRunnable() {
             int seconds = 0;
 
             @Override public void run() {
@@ -264,7 +266,8 @@ public class BloodPower extends Power implements IdlePower {
 
                 seconds++;
             }
-        }.runTaskTimer(magicPlugin, 0, 20);
+        };
+        veilTask.runTaskTimer(magicPlugin, 0, 20);
 
         addCd(CD_VEIL, p);
     }
@@ -275,7 +278,7 @@ public class BloodPower extends Power implements IdlePower {
         if (current <= 3.0) { sendActionBar(p, "§cNot enough HP to sacrifice!"); return; }
 
         double sacrifice = Math.max(2.0, Math.min(8.0, current * 0.30));
-        
+
         if (current - sacrifice < 1.0) sacrifice = current - 1.0;
         if (sacrifice < 1.0) { sendActionBar(p, "§cNot enough HP to sacrifice!"); return; }
 
@@ -323,13 +326,13 @@ public class BloodPower extends Power implements IdlePower {
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
                 if (isAuraEnabled(p)) {
-                    
+
                     for (int i = 0; i < 2; i++) {
                         double a = rng.nextDouble() * Math.PI * 2;
                         Location drop = p.getLocation().clone().add(Math.cos(a) * 0.6, 1.8 + rng.nextDouble() * 0.4, Math.sin(a) * 0.6);
                         particleApi.spawnColoredParticles(drop, i == 0 ? C_MID : C_DARK, 1.5f, 1, 0.05, 0.05, 0.05);
                     }
-                    
+
                     particleCircle(p.getLocation().clone().add(0, 0.05, 0), 0.55, C_DARK, 1f, 8, t * 22);
                 }
                 t++;
@@ -367,4 +370,14 @@ public class BloodPower extends Power implements IdlePower {
         particleApi.spawnColoredParticles(loc, C_DARK,   1.5f, count / 2, 0.3, 0.3, 0.3);
         loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_HURT, 0.5f, 0.4f);
     }
+
+    @Override
+    public void remove() {
+        veilActive = false;
+        if (veilTask != null) {
+            veilTask.cancel();
+            veilTask = null;
+        }
+    }
 }
+

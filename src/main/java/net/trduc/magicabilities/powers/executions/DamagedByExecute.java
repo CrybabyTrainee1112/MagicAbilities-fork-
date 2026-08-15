@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.powers.executions;
+package net.trduc.magicabilitiesfork.powers.executions;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -21,3 +21,4 @@ public class DamagedByExecute extends Execute{
         return getDamageEvent().getDamage();
     }
 }
+

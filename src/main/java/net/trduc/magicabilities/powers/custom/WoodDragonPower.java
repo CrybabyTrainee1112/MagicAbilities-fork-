@@ -1,10 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -18,11 +17,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class WoodDragonPower extends Power implements IdlePower, Removeable {
 
@@ -86,7 +84,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 0.5f);
         p.getWorld().playSound(loc, Sound.ENTITY_RAVAGER_ROAR,       1f, 0.6f);
         p.getWorld().playSound(loc, Sound.ENTITY_RAVAGER_ATTACK,     0.7f, 0.4f);
-        p.sendMessage(ChatColor.GREEN + "✦ 龍吼 — LONG HỐNG!");
+        p.sendMessage(ChatColor.GREEN + "✦ 龍吼 — DRAGON ROAR!");
 
         Set<UUID> hit = new HashSet<>();
 
@@ -188,7 +186,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         Location center = getRaycastGround(p, 20);
         p.getWorld().playSound(center, Sound.BLOCK_ROOTED_DIRT_BREAK, 1f, 0.5f);
         p.getWorld().playSound(center, Sound.ENTITY_RAVAGER_ATTACK,   0.6f, 0.7f);
-        p.sendMessage(ChatColor.GREEN + "✦ 天羅地網 — Thiên La Địa Võng!");
+        p.sendMessage(ChatColor.GREEN + "✦ 天羅地網 — HEAVEN NET!");
         netTraps.add(center);
 
         Set<UUID> trapped = new HashSet<>();
@@ -382,7 +380,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         Location center = p.getLocation().clone();
         p.getWorld().playSound(center, Sound.BLOCK_GRASS_PLACE,     1f, 0.6f);
         p.getWorld().playSound(center, Sound.ENTITY_PLAYER_LEVELUP, 0.7f, 1.4f);
-        p.sendMessage(ChatColor.GREEN + "✦ 生命林 — Sinh Mệnh Lâm!");
+        p.sendMessage(ChatColor.GREEN + "✦ 生命林 — LIFE FOREST!");
 
         List<Block> groveTrees = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -436,7 +434,7 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL,    1f, 0.3f);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_RAVAGER_ROAR,          1f, 0.4f);
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_ROOTED_DIRT_BREAK,      1f, 0.4f);
-        p.sendMessage(ChatColor.GREEN + "✦ 根王憤怒 — " + ChatColor.BOLD + "CĂN VƯƠNG PHẪN NỘ!");
+        p.sendMessage(ChatColor.GREEN + "✦ 根王憤怒 — " + ChatColor.BOLD + "ROOT KING'S WRATH!");
 
         Location center = p.getLocation().clone().add(0, 0.5, 0);
         Set<UUID> seized = new HashSet<>();
@@ -642,12 +640,12 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
     @Override
     public String getAbilityName(int ability) {
         switch (ability) {
-            case 0: return "&a龍吼 Long Hống";
-            case 1: return "&a木劍舞 Mộc Kiếm Vũ";
-            case 2: return "&a天羅地網 Thiên La Địa Võng";
-            case 3: return "&a狂林衝 Cuồng Lâm Xung";
-            case 4: return "&a生命林 Sinh Mệnh Lâm";
-            case 5: return "&2&l根王憤怒 Căn Vương Phẫn Nộ";
+            case 0: return "&a龍吼 Dragon Roar";
+            case 1: return "&a木劍舞 Wood Sword Dance";
+            case 2: return "&a天羅地網 Heaven Net";
+            case 3: return "&a狂林衝 Wild Forest Rush";
+            case 4: return "&a生命林 Life Forest";
+            case 5: return "&2&l根王憤怒 Root King's Wrath";
             default: return "&7none";
         }
     }
@@ -728,3 +726,4 @@ public class WoodDragonPower extends Power implements IdlePower, Removeable {
         }
     }
 }
+

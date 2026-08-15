@@ -1,10 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -15,13 +14,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class Eternity extends Power implements IdlePower {
     private static final String eternity_immunity = "eternity.immunity";
@@ -247,17 +245,17 @@ public class Eternity extends Power implements IdlePower {
 
     @Override
     public BukkitRunnable executeIdle(IdleExecute ex) {
-        if (timer>reset){
-            resetCombo();
-        }
-        timer++;
-
         final Player p = ex.getPlayer();
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
-                particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
-                        Particle.WITCH, 3, 0.1, 0.3, 0.1, 0.01);
+                timer++;
+                if (timer>reset){
+                    resetCombo();
+                }
+                if (isAuraEnabled(p))
+                    particleApi.spawnParticles(p.getLocation().clone().add(0, 1, 0),
+                            Particle.WITCH, 3, 0.1, 0.3, 0.1, 0.01);
             }
         };
         r.runTaskTimer(magicPlugin, 0, 15);
@@ -276,3 +274,4 @@ public class Eternity extends Power implements IdlePower {
         }
     }
 }
+

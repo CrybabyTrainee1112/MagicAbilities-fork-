@@ -1,11 +1,11 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.ConsumeExecute;
-import net.trduc.magicabilities.powers.executions.Execute;
-import net.trduc.magicabilities.powers.executions.IdleExecute;
-import net.trduc.magicabilities.powers.executions.MineExecute;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.ConsumeExecute;
+import net.trduc.magicabilitiesfork.powers.executions.Execute;
+import net.trduc.magicabilitiesfork.powers.executions.IdleExecute;
+import net.trduc.magicabilitiesfork.powers.executions.MineExecute;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -18,13 +18,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.Random;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
 
 public class AlcoholizmPower extends Power implements IdlePower {
-    private boolean drunk = false;
     public AlcoholizmPower(Player owner) {
         super(owner);
     }
@@ -50,8 +49,9 @@ public class AlcoholizmPower extends Power implements IdlePower {
                             p.getWorld().spawn(p.getLocation(), Zombie.class);
                         }
                     }
-                    drunk=true;
-                    p.getActivePotionEffects().clear();
+                    for (PotionEffect existing : new ArrayList<>(p.getActivePotionEffects())) {
+                        p.removePotionEffect(existing.getType());
+                    }
                     p.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20*1500, 4));
                     p.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 20*60, 4));
                     p.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20*1500, 2));
@@ -80,16 +80,21 @@ public class AlcoholizmPower extends Power implements IdlePower {
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
+                boolean isDrunk = false;
+                for (PotionEffect pot : p.getActivePotionEffects()){
+                    if (pot.getType().equals(PotionEffectType.STRENGTH)){
+                        isDrunk = true;
+                        break;
+                    }
+                }
                 if (p.getFoodLevel()>=16){
-                    if (!drunk){
+                    if (!isDrunk){
                         p.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 41, 0));
                         p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 41, 0));
                     }
                 }
-                for (PotionEffect pot : p.getActivePotionEffects()){
-                    if (pot.getType().equals(PotionEffectType.STRENGTH)){
-                        return;
-                    }
+                if (isDrunk){
+                    return;
                 }
                 p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 41, 0));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 41, 0));
@@ -100,3 +105,4 @@ public class AlcoholizmPower extends Power implements IdlePower {
         return r;
     }
 }
+

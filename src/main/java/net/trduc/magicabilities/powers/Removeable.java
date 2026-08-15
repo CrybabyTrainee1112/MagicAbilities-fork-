@@ -1,5 +1,6 @@
-package net.trduc.magicabilities.powers;
+package net.trduc.magicabilitiesfork.powers;
 
 public interface Removeable {
     public void remove();
 }
+

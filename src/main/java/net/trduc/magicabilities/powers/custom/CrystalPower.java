@@ -1,8 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -13,13 +14,13 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
-public class CrystalPower extends Power implements IdlePower {
+public class CrystalPower extends Power implements IdlePower, Removeable {
 
     private static final String CD_SHELL    = "crystal.shell";
     private static final String CD_SPIRE    = "crystal.spire";
@@ -34,8 +35,11 @@ public class CrystalPower extends Power implements IdlePower {
 
     private boolean shellActive = false;
     private double  shellAbsorbed = 0.0;
+    private BukkitRunnable shellAuraTask = null;
+    private BukkitRunnable shellShatterTask = null;
 
     private boolean fieldActive = false;
+    private BukkitRunnable fractureFieldTask = null;
 
     private int activeShards = 0;
 
@@ -83,7 +87,7 @@ public class CrystalPower extends Power implements IdlePower {
             }
         }.runTask(magicPlugin);
 
-        BukkitRunnable aura = new BukkitRunnable() {
+        shellAuraTask = new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
                 if (!shellActive || !p.isOnline()) { cancel(); return; }
@@ -93,12 +97,12 @@ public class CrystalPower extends Power implements IdlePower {
                 t++;
             }
         };
-        aura.runTaskTimer(magicPlugin, 0, 3);
+        shellAuraTask.runTaskTimer(magicPlugin, 0, 3);
 
-        new BukkitRunnable() {
+        shellShatterTask = new BukkitRunnable() {
             @Override public void run() {
-                if (!p.isOnline()) { aura.cancel(); shellActive = false; activeShards = Math.max(0, activeShards - 1); return; }
-                aura.cancel();
+                if (!p.isOnline()) { shellAuraTask.cancel(); shellActive = false; activeShards = Math.max(0, activeShards - 1); return; }
+                shellAuraTask.cancel();
                 shellActive = false;
                 activeShards = Math.max(0, activeShards - 1);
                 if (shellAbsorbed < 0.5) return;
@@ -126,7 +130,8 @@ public class CrystalPower extends Power implements IdlePower {
                 p.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.5f);
                 sendActionBar(p, String.format("§5💎 Shell shattered — released §f%.1f §5damage!", releaseDmg));
             }
-        }.runTaskLater(magicPlugin, 20 * 4);
+        };
+        shellShatterTask.runTaskLater(magicPlugin, 20 * 4);
 
         sendActionBar(p, "§5💎 Crystal Shell activated!");
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1f, 0.8f);
@@ -136,7 +141,7 @@ public class CrystalPower extends Power implements IdlePower {
     private void handleShellAbsorb(DamagedExecute ex) {
         if (!shellActive) return;
         EntityDamageEvent event = (EntityDamageEvent) ex.getRawEvent();
-        
+
         if (event.getCause() == EntityDamageEvent.DamageCause.VOID) return;
         shellAbsorbed += event.getFinalDamage();
         event.setDamage(0);
@@ -211,7 +216,7 @@ public class CrystalPower extends Power implements IdlePower {
         p.getWorld().playSound(center, Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 0.5f);
         sendActionBar(p, "§5💠 Fracture Field expanding!");
 
-        new BukkitRunnable() {
+        fractureFieldTask = new BukkitRunnable() {
             int seconds = 0;
 
             @Override public void run() {
@@ -238,7 +243,7 @@ public class CrystalPower extends Power implements IdlePower {
                     if (!(e instanceof LivingEntity) || e.equals(p)) continue;
                     LivingEntity le = (LivingEntity) e;
                     le.damage(2.0, p);
-                    applyPotion(le, PotionEffectType.SLOWNESS, 25, 2); 
+                    applyPotion(le, PotionEffectType.SLOWNESS, 25, 2);
                     if (!slowed.contains(e.getUniqueId())) {
                         spawnCrystalBurst(e.getLocation().add(0, 1, 0), 5);
                         slowed.add(e.getUniqueId());
@@ -247,7 +252,8 @@ public class CrystalPower extends Power implements IdlePower {
 
                 seconds++;
             }
-        }.runTaskTimer(magicPlugin, 0, 20);
+        };
+        fractureFieldTask.runTaskTimer(magicPlugin, 0, 20);
 
         addCd(CD_FIELD, p);
     }
@@ -274,7 +280,7 @@ public class CrystalPower extends Power implements IdlePower {
         }.runTask(magicPlugin);
 
         applyPotion(prisoner, PotionEffectType.SLOWNESS,  20 * 3, 10);
-        applyPotion(prisoner, PotionEffectType.JUMP_BOOST, 20 * 3, -1); 
+        applyPotion(prisoner, PotionEffectType.JUMP_BOOST, 20 * 3, -1);
         prisoner.setVelocity(new Vector(0, 0, 0));
 
         BukkitRunnable cageVfx = new BukkitRunnable() {
@@ -286,7 +292,7 @@ public class CrystalPower extends Power implements IdlePower {
                     particleCircle(loc.clone().add(0, lvl, 0), 1.1, t % 4 < 2 ? C_BRIGHT : C_MID,
                             2f, 10, t * 15);
                 }
-                
+
                 prisoner.setVelocity(new Vector(0, 0, 0));
                 t++;
             }
@@ -300,7 +306,7 @@ public class CrystalPower extends Power implements IdlePower {
                 if (!prisoner.isValid()) return;
 
                 Location loc = prisoner.getLocation().clone().add(0, 1, 0);
-                
+
                 for (int ring = 1; ring <= 3; ring++) {
                     final int r = ring;
                     new BukkitRunnable() {
@@ -394,7 +400,7 @@ public class CrystalPower extends Power implements IdlePower {
     }
 
     private void passiveReflect(DamagedByExecute ex) {
-        if (shellActive) return; 
+        if (shellActive) return;
         if (!(ex.getRawEvent() instanceof EntityDamageByEntityEvent)) return;
         EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) ex.getRawEvent();
         if (!(event.getDamager() instanceof LivingEntity)) return;
@@ -419,16 +425,16 @@ public class CrystalPower extends Power implements IdlePower {
             int t = 0;
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
-                
+
                 applyPotionSilent(p, PotionEffectType.RESISTANCE, 30, 0);
 
                 if (isAuraEnabled(p)) {
-                    
+
                     particleCircle(p.getLocation().clone().add(0, 0.08, 0),
                             0.7, C_MID, 1.5f, 8, t * 20);
                     particleCircle(p.getLocation().clone().add(0, 1.9, 0),
                             0.7, C_DEEP, 1.5f, 8, -t * 20);
-                    
+
                     if (t % 2 == 0) {
                         double a = rng.nextDouble() * Math.PI * 2;
                         Location drop = p.getLocation().clone().add(
@@ -460,4 +466,14 @@ public class CrystalPower extends Power implements IdlePower {
         particleApi.spawnColoredParticles(loc, C_DEEP,   1.5f, count / 2, 0.3, 0.3, 0.3);
         particleApi.spawnColoredParticles(loc, C_WHITE,  4f,   2,         0.2, 0.2, 0.2);
     }
+
+    @Override
+    public void remove() {
+        shellActive = false;
+        fieldActive = false;
+        if (shellAuraTask != null) { shellAuraTask.cancel(); shellAuraTask = null; }
+        if (shellShatterTask != null) { shellShatterTask.cancel(); shellShatterTask = null; }
+        if (fractureFieldTask != null) { fractureFieldTask.cancel(); fractureFieldTask = null; }
+    }
 }
+

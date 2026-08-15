@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.powers.executions;
+package net.trduc.magicabilitiesfork.powers.executions;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -8,3 +8,4 @@ public class DeathExecute extends Execute{
         super(event, player);
     }
 }
+

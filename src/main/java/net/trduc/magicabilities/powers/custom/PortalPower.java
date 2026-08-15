@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffectType;
@@ -12,12 +12,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown;
 
 public class PortalPower extends Power implements IdlePower, Removeable {
 
@@ -29,7 +29,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
     private static final String p_step     = "portal.step";
     private static final String p_blink    = "portal.blink";
     private static final String p_gate     = "portal.gate";
-    private static final String p_dodge    = "portal.dodge";   
+    private static final String p_dodge    = "portal.dodge";
 
     private int XP_GATE;
 
@@ -57,7 +57,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
 
     @Override
     public void executePower(Execute ex) {
-        
+
         if (ex instanceof DamagedByExecute) {
             passiveDodge((DamagedByExecute) ex);
             return;
@@ -78,7 +78,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
             case 3: if (onCd(p_rift,    p, this)) return; riftPull(p);           addCd(p_rift,    p); return;
             case 4: if (onCd(p_barrage, p, this)) return; portalBarrage(p);      addCd(p_barrage, p); return;
             case 7:
-                
+
                 if (onCd(p_gate, p, this)) return;
                 if (!checkXp(p, XP_GATE, this)) return;
                 spendXp(p, XP_GATE);
@@ -171,7 +171,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
 
     private void phaseShift(Player p) {
         Location target = getRaycastTarget(p, 20);
-        
+
         target.add(p.getEyeLocation().getDirection().normalize().multiply(-0.5));
         target.setY(target.getY() + 0.1);
 
@@ -196,7 +196,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
 
     private final Map<UUID, Long> portalCooldowns = new HashMap<>();
     private static final long PORTAL_CD_MS = 3000L;
-    
+
     private static final int PORTAL_LIFETIME_S = 60;
 
     private void mirrorPortal(Player p) {
@@ -245,7 +245,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
                 }
 
                 if (remaining <= 0) {
-                    
+
                     if (portalA != null) spawnPortalBurst(portalA.clone().add(0, 1, 0), 40);
                     if (portalB != null) spawnPortalBurst(portalB.clone().add(0, 1, 0), 40);
                     p.getWorld().playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.6f, 2.0f);
@@ -274,12 +274,12 @@ public class PortalPower extends Power implements IdlePower, Removeable {
     }
 
     private void drawPortalRing(Location center, int tick, Color inner, Color outer) {
-        
+
         particleCircle(center.clone().add(0, 0.8, 0), 0.9, inner, 1.1f, 16, tick * 6);
         particleCircle(center.clone().add(0, 1.5, 0), 0.9, inner, 1.0f, 16, -(tick * 5));
-        
+
         particleCircle(center.clone().add(0, 1.1, 0), 1.2, outer, 1.0f, 12, tick * 4);
-        
+
         particleApi.spawnColoredParticles(center.clone().add(0, 1.1, 0),
                 C_WHITE_VOID, 0.9f, 1, 0.1, 0.3, 0.1);
         particleApi.spawnParticles(center.clone().add(0, 1.0, 0),
@@ -296,7 +296,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
                     cancel();
                     return;
                 }
-                
+
                 checkPortalEntry(p, portalA, portalB);
                 checkPortalEntry(p, portalB, portalA);
                 lifetime++;
@@ -310,7 +310,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
         for (Entity e : entry.getWorld().getNearbyEntities(entry, 1.4, 2.0, 1.4)) {
             if (e instanceof ArmorStand) continue;
             UUID uid = e.getUniqueId();
-            
+
             Long lastTp = portalCooldowns.get(uid);
             if (lastTp != null && now - lastTp < PORTAL_CD_MS) continue;
 
@@ -350,7 +350,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
             int t = 0;
             @Override public void run() {
                 if (t >= 30) {
-                    
+
                     riftRelease(center, p);
                     cancel();
                     return;
@@ -406,7 +406,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
             final int delay = i * 4;
             new BukkitRunnable() {
                 @Override public void run() {
-                    
+
                     Location spawnLoc = p.getEyeLocation().clone()
                             .add(p.getEyeLocation().getDirection().clone().multiply(2));
                     spawnPortalBurst(spawnLoc, 15);
@@ -417,7 +417,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
     }
 
     private void voidStep(Player p) {
-        
+
         LivingEntity target = null;
         Location eye = p.getEyeLocation();
         Vector dir = eye.getDirection().normalize();
@@ -437,7 +437,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
         }
 
         Location from = p.getLocation().clone();
-        
+
         Vector behind = target.getLocation().getDirection().normalize().multiply(1.8);
         Location dest  = target.getLocation().clone().subtract(behind);
         dest.setDirection(target.getLocation().toVector().subtract(dest.toVector()));
@@ -498,7 +498,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
     }
 
     private void spawnPhantomAfterimage(Location loc) {
-        
+
         new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
@@ -572,7 +572,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
                         p.getWorld().playSound(center, Sound.BLOCK_PORTAL_TRAVEL, 0.5f, 0.3f);
                     }
                     if (t == 79) {
-                        
+
                         p.getWorld().playSound(center, Sound.ENTITY_WARDEN_DEATH, 1f, 0.5f);
                         particleApi.spawnColoredParticles(gate, C_WHITE_VOID, 2f, 200, 3, 3, 3);
                     }
@@ -621,7 +621,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
             double dist = Math.max(0.5, e.getLocation().distance(gate));
             double dmg  = Math.max(10, 40 - dist * 2.5);
             ((LivingEntity) e).damage(dmg, p);
-            
+
             Vector kb = e.getLocation().subtract(gate).toVector().normalize().multiply(4.0).setY(1.0);
             e.setVelocity(isVecFinite(kb) ? kb : new Vector(0, 1.0, 0));
             applyPotion((LivingEntity) e, PotionEffectType.BLINDNESS, 80, 0);
@@ -667,7 +667,7 @@ public class PortalPower extends Power implements IdlePower, Removeable {
             int t = 0;
             @Override public void run() {
                 if (!p.isOnline()) { cancel(); return; }
-                
+
                 if (isAuraEnabled(p)) {
                     particleCircle(p.getLocation().clone().add(0, 0.05, 0),
                             0.6, C_PURPLE, 0.9f, 5, t * 25);
@@ -709,3 +709,4 @@ public class PortalPower extends Power implements IdlePower, Removeable {
         particleApi.spawnParticles(loc, Particle.PORTAL, count, 0.4, 0.4, 0.4, 1.0);
     }
 }
+

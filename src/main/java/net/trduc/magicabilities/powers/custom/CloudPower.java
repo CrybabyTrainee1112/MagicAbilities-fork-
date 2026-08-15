@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffectType;
@@ -12,12 +12,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
-import static net.trduc.magicabilities.cooldowns.CooldownApi.isOnCooldown;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.cooldowns.CooldownApi.isOnCooldown;
 
 public class CloudPower extends Power implements IdlePower, Removeable {
 
@@ -29,7 +29,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
     private static final String c_step    = "cloud.step";
     private static final String c_dash    = "cloud.dash";
     private static final String c_storm   = "cloud.storm";
-    private static final String c_mist    = "cloud.mist";   
+    private static final String c_mist    = "cloud.mist";
 
     private int XP_STORM;
 
@@ -160,7 +160,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
 
     private void cloudAscend(Player p) {
         if (ascending) {
-            
+
             stopAscend(p);
             return;
         }
@@ -177,7 +177,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
             int t = 0;
             @Override public void run() {
                 if (!p.isOnline() || !ascending) { cancel(); return; }
-                if (t > 200) { stopAscend(p); cancel(); return; } 
+                if (t > 200) { stopAscend(p); cancel(); return; }
 
                 Vector vel = p.getVelocity();
                 if (vel.getY() < -0.1) {
@@ -227,11 +227,11 @@ public class CloudPower extends Power implements IdlePower, Removeable {
         new BukkitRunnable() {
             int t = 0;
             @Override public void run() {
-                if (t > 120) { cancel(); return; } 
+                if (t > 120) { cancel(); return; }
 
                 for (float w = -2.5f; w <= 2.5f; w += 0.5f) {
                     for (float h = 0f; h <= 3f; h += 0.5f) {
-                        if (rng.nextInt(3) != 0) continue; 
+                        if (rng.nextInt(3) != 0) continue;
                         Location pt = base.clone().add(perp.clone().multiply(w)).add(0, h, 0);
                         Color c = CLOUD_COLS[rng.nextInt(CLOUD_COLS.length)];
                         particleApi.spawnColoredParticles(pt, c, 1.1f, 1, 0.1, 0.1, 0.1);
@@ -244,7 +244,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                     for (Entity e : base.getWorld().getNearbyEntities(base, 2.8, 2.0, 2.8)) {
                         if (e.equals(p) || e instanceof ArmorStand || hit.contains(e)) continue;
                         if (!(e instanceof LivingEntity)) continue;
-                        
+
                         Vector toE = e.getLocation().toVector().subtract(base.toVector());
                         double along = toE.dot(fwd);
                         double side  = Math.abs(toE.dot(perp));
@@ -254,7 +254,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                             applyPotion((LivingEntity) e, PotionEffectType.SLOWNESS,  60, 2);
                             ((LivingEntity) e).damage(5, p);
                             e.getWorld().playSound(e.getLocation(), Sound.ENTITY_BREEZE_SHOOT, 0.5f, 0.7f);
-                            
+
                             new BukkitRunnable() {
                                 @Override public void run() { hit.remove(e.getUniqueId()); }
                             }.runTaskLater(magicPlugin, 40L);
@@ -282,7 +282,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                     p.getWorld().playSound(p.getLocation(), Sound.ENTITY_PHANTOM_HURT, 1f, 0.5f);
                 }
                 if (diving) {
-                    
+
                     particleApi.spawnParticles(p.getLocation().add(0, 1, 0),
                             Particle.CLOUD, 12, 0.3, 0.1, 0.3, 0.04);
                     particleApi.spawnColoredParticles(p.getLocation().add(0, 1, 0),
@@ -364,7 +364,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
     private void nimbusDash(Player p) {
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_BREEZE_WIND_BURST, 1f, 1.4f);
         Vector dir = p.getEyeLocation().getDirection().clone().normalize();
-        
+
         dir.setY(Math.max(dir.getY(), 0.0));
         p.setVelocity(dir.multiply(2.6));
         p.setFallDistance(0);
@@ -417,7 +417,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                 Location center = p.getLocation().clone().add(0, 4, 0);
 
                 if (t < 40) {
-                    double grow = (double) t / 40; 
+                    double grow = (double) t / 40;
                     double r = 4 + grow * 16;
 
                     for (int i = 0; i < 20; i++) {
@@ -432,7 +432,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                 }
 
                 else if (t < 120) {
-                    
+
                     for (int i = 0; i < 35; i++) {
                         double a = Math.toRadians(rng.nextDouble() * 360);
                         double d = rng.nextDouble() * 20;
@@ -519,7 +519,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(loc, Sound.ENTITY_BREEZE_SHOOT, 0.5f, 1.6f);
         particleApi.spawnParticles(loc, Particle.CLOUD, 40, 0.8, 0.6, 0.8, 0.1);
         particleApi.spawnColoredParticles(loc, C_WHITE, 1.2f, 20, 0.6, 0.5, 0.6);
-        
+
         if (ex.getDamager() instanceof LivingEntity) {
             LivingEntity att = (LivingEntity) ex.getDamager();
             applyPotion(att, PotionEffectType.BLINDNESS, 40, 0);
@@ -537,7 +537,7 @@ public class CloudPower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { cancel(); return; }
                 p.setFallDistance(0);
                 if (isAuraEnabled(p)) {
-                    
+
                     particleCircle(p.getLocation().clone().add(0, 0.07, 0),
                             0.65, C_SKY, 0.9f, 5, t * 22);
                     particleApi.spawnColoredParticles(
@@ -581,3 +581,4 @@ public class CloudPower extends Power implements IdlePower, Removeable {
         particleApi.spawnColoredParticles(loc, C_SKY,   1.1f, count / 3, 0.5, 0.3, 0.5);
     }
 }
+

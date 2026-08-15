@@ -1,11 +1,11 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.Execute;
-import net.trduc.magicabilities.powers.executions.IdleExecute;
-import net.trduc.magicabilities.powers.executions.LeftClickExecute;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.Execute;
+import net.trduc.magicabilitiesfork.powers.executions.IdleExecute;
+import net.trduc.magicabilitiesfork.powers.executions.LeftClickExecute;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -15,12 +15,11 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class WarpPower extends Power implements IdlePower {
     private static final String warp_default = "warp.default";
@@ -111,7 +110,6 @@ public class WarpPower extends Power implements IdlePower {
         for (Player p : Bukkit.getOnlinePlayers()){
             if (p.equals(player)) continue;
             if (!players.containsKey(p)) continue;
-            if (true) continue;
             String xStyle = r.nextBoolean() ? ChatColor.MAGIC + "" : "";
             String yStyle = r.nextBoolean() ? ChatColor.MAGIC + "" : "";
             String zStyle = r.nextBoolean() ? ChatColor.MAGIC + "" : "";
@@ -148,12 +146,14 @@ public class WarpPower extends Power implements IdlePower {
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
-                particleApi.spawnColoredParticles(
-                        p.getLocation().clone().add(0, 0.06, 0),
-                        Color.fromRGB(120, 0, 200), 1.0f, 1, 0.3, 0.01, 0.3);
+                if (isAuraEnabled(p))
+                    particleApi.spawnColoredParticles(
+                            p.getLocation().clone().add(0, 0.06, 0),
+                            Color.fromRGB(120, 0, 200), 1.0f, 1, 0.3, 0.01, 0.3);
             }
         };
         r.runTaskTimer(magicPlugin, 0, 10);
         return r;
     }
 }
+

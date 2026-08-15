@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.misc;
+package net.trduc.magicabilitiesfork.misc;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -91,3 +91,4 @@ public class GeneralMethods {
         return vector.clone().setX(x).setZ(z);
     }
 }
+

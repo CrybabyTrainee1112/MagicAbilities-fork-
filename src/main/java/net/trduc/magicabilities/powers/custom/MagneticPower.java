@@ -1,8 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -13,13 +14,13 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
-public class MagneticPower extends Power implements IdlePower {
+public class MagneticPower extends Power implements IdlePower, Removeable {
 
     private static final String CD_PULL    = "magnetic.pull";
     private static final String CD_WAVE    = "magnetic.wave";
@@ -86,7 +87,7 @@ public class MagneticPower extends Power implements IdlePower {
             if (!isVecFinite(pull) || pull.lengthSquared() < 0.01) continue;
             pull.normalize().multiply(1.6).setY(0.35);
             le.setVelocity(pull);
-            
+
             particleLine(le.getLocation().add(0,1,0), center, 0.6, C_CYAN, 1.5f);
         }
 
@@ -142,7 +143,7 @@ public class MagneticPower extends Power implements IdlePower {
                 Vector pull = dest.clone().subtract(t2.getLocation()).toVector();
                 if (!isVecFinite(pull)) { cancel(); return; }
                 t2.setVelocity(pull.normalize().multiply(1.5));
-                
+
                 particleApi.spawnColoredParticles(t2.getLocation().add(0,1,0),
                         C_BLUE, 2f, 3, 0.15, 0.15, 0.15);
                 t++;
@@ -168,7 +169,7 @@ public class MagneticPower extends Power implements IdlePower {
         if (onCd(CD_POLARITY, p, this)) return;
 
         if (!pullFieldActive) {
-            
+
             pullFieldActive = true;
             sendActionBar(p, "§b⬡ Pull Field ON — pulling enemies in!");
             p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 1.2f);
@@ -177,12 +178,12 @@ public class MagneticPower extends Power implements IdlePower {
                 int t = 0;
                 @Override public void run() {
                     if (!pullFieldActive || !p.isOnline()) { cancel(); return; }
-                    
+
                     if (isAuraEnabled(p)) {
                         particleCircle(p.getLocation().clone().add(0, 0.5, 0),
                                 8.0, C_BLUE, 1f, 28, t * 12);
                     }
-                    
+
                     if (t % 20 == 0) {
                         for (LivingEntity le : getNearbyTargets(p, 8)) {
                             Vector pull = p.getLocation().add(0,1,0)
@@ -198,7 +199,7 @@ public class MagneticPower extends Power implements IdlePower {
             pullFieldTask.runTaskTimer(magicPlugin, 0, 1);
 
         } else {
-            
+
             pullFieldActive = false;
             if (pullFieldTask != null) { pullFieldTask.cancel(); pullFieldTask = null; }
 
@@ -223,7 +224,7 @@ public class MagneticPower extends Power implements IdlePower {
             sendActionBar(p, "§b⬡ Pull Field OFF — knockback burst!");
         }
 
-        addCdFixed(CD_POLARITY, p, 2.0); 
+        addCdFixed(CD_POLARITY, p, 2.0);
     }
 
     private void scrapStorm(Player p) {
@@ -260,7 +261,7 @@ public class MagneticPower extends Power implements IdlePower {
             new BukkitRunnable() {
                 @Override public void run() {
                     if (!fireTarget.isValid()) return;
-                    
+
                     particleLine(p.getLocation().add(0,1,0),
                             fireTarget.getLocation().add(0,1,0), 0.45, C_SILVER, 2.5f);
                     fireTarget.damage(8.0, p);
@@ -307,7 +308,7 @@ public class MagneticPower extends Power implements IdlePower {
 
             @Override public void run() {
                 if (!caged.isValid() || !p.isOnline() || seconds >= 5) {
-                    
+
                     if (caged.isValid()) {
                         Vector release = knockbackVector(p.getLocation(), caged, 2.0, 0.7);
                         caged.setVelocity(release);
@@ -330,13 +331,13 @@ public class MagneticPower extends Power implements IdlePower {
 
                 if (isAuraEnabled(p)) {
                     particleApi.spawnColoredParticles(orbitLoc, C_CYAN, 2.5f, 2, 0.1, 0.1, 0.1);
-                    
+
                     if (ticks % 5 == 0)
                         particleLine(p.getLocation().add(0,1,0),
                                 caged.getLocation().add(0,1,0), 0.6, C_BLUE, 1.5f);
                 }
 
-                angle += 0.18; 
+                angle += 0.18;
 
                 if (ticks % 20 == 0 && ticks > 0) {
                     caged.damage(3.0, p);
@@ -367,7 +368,7 @@ public class MagneticPower extends Power implements IdlePower {
         if (isVecFinite(snap) && snap.lengthSquared() > 0.01) {
             attacker.setVelocity(snap.normalize().multiply(1.2).setY(0.3));
         }
-        applyPotion(attacker, PotionEffectType.SLOWNESS, 10, 4); 
+        applyPotion(attacker, PotionEffectType.SLOWNESS, 10, 4);
         particleLine(p.getLocation().add(0,1,0), attacker.getLocation().add(0,1,0),
                 0.4, C_CYAN, 1.5f);
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_CHAIN_PLACE, 0.7f, 1.5f);
@@ -383,7 +384,7 @@ public class MagneticPower extends Power implements IdlePower {
                 applyPotionSilent(p, PotionEffectType.SPEED, 30, 0);
 
                 if (isAuraEnabled(p)) {
-                    
+
                     for (int i = 0; i < 3; i++) {
                         double a = Math.toRadians(t * (12 + i * 5) + i * 120);
                         double rad = 0.6 + i * 0.25;
@@ -419,4 +420,18 @@ public class MagneticPower extends Power implements IdlePower {
         particleApi.spawnColoredParticles(loc, C_SILVER, 2f,   count / 2, 0.25, 0.25, 0.25);
         particleApi.spawnColoredParticles(loc, C_WHITE,  3.5f, 2,         0.15, 0.15, 0.15);
     }
+
+    @Override
+    public void remove() {
+        pullFieldActive = false;
+        if (pullFieldTask != null) {
+            pullFieldTask.cancel();
+            pullFieldTask = null;
+        }
+        for (BukkitRunnable orbit : cagedEntities.values()) {
+            orbit.cancel();
+        }
+        cagedEntities.clear();
+    }
 }
+

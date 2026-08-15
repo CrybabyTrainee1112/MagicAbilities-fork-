@@ -1,9 +1,9 @@
-package net.trduc.magicabilities.misc;
+package net.trduc.magicabilitiesfork.misc;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.Power;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.Power;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -16,10 +16,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.cooldowns.Cooldowns.cooldowns;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 public final class PowerUtils {
 
     private PowerUtils() {}
@@ -291,10 +291,10 @@ public final class PowerUtils {
                                      Color color, float size) {
         Vector dir  = to.toVector().subtract(from.toVector());
         double dist = from.distance(to);
-        if (dist < 0.01) return;
+        if (dist < 0.01 || step <= 0.01) return;
         Vector unit = dir.normalize().multiply(step);
         Location cur = from.clone();
-        int steps = (int)(dist / step);
+        int steps = Math.min((int)(dist / step), 500);
         for (int i = 0; i <= steps; i++) {
             particleApi.spawnColoredParticles(cur, color, size, 1, 0.04, 0.04, 0.04);
             cur.add(unit);
@@ -322,3 +322,4 @@ public final class PowerUtils {
         return magicPlugin.getConfig().getBoolean(path, defaultVal);
     }
 }
+

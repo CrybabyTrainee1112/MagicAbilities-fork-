@@ -1,11 +1,10 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -17,12 +16,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.cooldowns.Cooldowns.cooldowns;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class LightningPower extends Power implements IdlePower, Removeable {
 
@@ -141,6 +140,7 @@ public class LightningPower extends Power implements IdlePower, Removeable {
                 if (fieldActive) return;
                 if (onCd(lightning_field, p, this)) return;
                 plasmaField(p);
+                addCd(lightning_field, p);
                 return;
 
             case 3:
@@ -216,7 +216,6 @@ public class LightningPower extends Power implements IdlePower, Removeable {
             public void run() {
                 if (t >= 80 || !p.isOnline()) {
                     p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.8f, 2f);
-                    addCd(lightning_field, p);
                     fieldActive = false;
                     cancel();
                     return;
@@ -574,3 +573,4 @@ public class LightningPower extends Power implements IdlePower, Removeable {
         return v.normalize().multiply(radius * r.nextDouble());
     }
 }
+

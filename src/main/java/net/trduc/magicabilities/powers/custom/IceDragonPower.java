@@ -1,11 +1,9 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -19,11 +17,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class IceDragonPower extends Power implements IdlePower, Removeable {
 
@@ -90,7 +87,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
         p.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_GROWL,    1f, 0.6f);
         p.getWorld().playSound(loc, Sound.ENTITY_WARDEN_SONIC_BOOM,     0.8f, 0.5f);
         p.getWorld().playSound(loc, Sound.ENTITY_ELDER_GUARDIAN_AMBIENT,0.6f, 0.4f);
-        p.sendMessage(ChatColor.AQUA + "✦ 龍吼 — LONG HỐNG!");
+        p.sendMessage(ChatColor.AQUA + "✦ 龍吼 — DRAGON ROAR!");
 
         new BukkitRunnable() {
             double rad = 0.3; int t = 0;
@@ -196,7 +193,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
 
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_GLASS_BREAK,   0.8f, 0.5f);
         p.getWorld().playSound(p.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 0.6f, 1.2f);
-        p.sendMessage(ChatColor.AQUA + "✦ 寒月陣 — Hàn Nguyệt Trận!");
+        p.sendMessage(ChatColor.AQUA + "✦ 寒月陣 — COLD MOON FORMATION!");
 
         Location center = target.getLocation().clone();
         List<Block> iceBlocks = new ArrayList<>();
@@ -367,7 +364,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
 
         p.getWorld().playSound(center, Sound.WEATHER_RAIN,          1f, 0.6f);
         p.getWorld().playSound(center, Sound.ENTITY_WARDEN_AMBIENT, 0.5f, 0.5f);
-        p.sendMessage(ChatColor.AQUA + "✦ 雪雨 — Tuyết Vũ!");
+        p.sendMessage(ChatColor.AQUA + "✦ 雪雨 — SNOW RAIN!");
 
         new BukkitRunnable() {
             int t = 0;
@@ -446,7 +443,7 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
                 }
                 if (ct == 20) {
                     p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 0.8f, 0.6f);
-                    p.sendMessage(ChatColor.AQUA + "✦ " + ChatColor.BOLD + "天寒 — THIÊN HÀN!");
+                    p.sendMessage(ChatColor.AQUA + "✦ " + ChatColor.BOLD + "天寒 — HEAVEN'S COLD!");
                 }
                 ct--;
             }
@@ -603,12 +600,12 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
     @Override
     public String getAbilityName(int ability) {
         switch (ability) {
-            case 0: return "&b龍吼 Long Hống";
-            case 1: return "&b冰斬 Băng Trảm";
-            case 2: return "&b寒月陣 Hàn Nguyệt Trận";
-            case 3: return "&b氷河衝 Băng Hà Xung";
-            case 4: return "&b雪雨 Tuyết Vũ";
-            case 5: return "&b&l天寒 Thiên Hàn";
+            case 0: return "&b龍吼 Dragon Roar";
+            case 1: return "&b冰斬 Ice Slash";
+            case 2: return "&b寒月陣 Cold Moon Formation";
+            case 3: return "&b氷河衝 Glacier Rush";
+            case 4: return "&b雪雨 Snow Rain";
+            case 5: return "&b&l天寒 Heaven's Cold";
             default: return "&7none";
         }
     }
@@ -686,3 +683,4 @@ public class IceDragonPower extends Power implements IdlePower, Removeable {
     }
 
 }
+

@@ -1,12 +1,11 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -19,11 +18,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class HuaShanPower extends Power implements IdlePower, Removeable {
 
@@ -159,7 +157,7 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
         boolean sneak = p.isSneaking();
 
         if (!isSlotUnlocked(p, slot)) {
-            hud(p, "§c Cần " + unlockNeeded(slot) + " XP để dùng chiêu này!");
+            hud(p, "§c Need " + unlockNeeded(slot) + " XP to use this ability!");
             return;
         }
 
@@ -281,7 +279,7 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
         }
         safeCircle(center.clone().add(0, 0.1, 0), LACHOA_RADIUS, C_SAKURA_LIGHT, 1.0f, 28);
         p.getWorld().playSound(center, Sound.BLOCK_AZALEA_LEAVES_STEP, 1.5f, 0.6f);
-        hud(p, "§d Lạc Hoa: vùng nhu hóa đã giăng ra!");
+        hud(p, "§d Falling Blossom: softening zone deployed!");
         addCd(hs_lachoa, p);
     }
 
@@ -390,7 +388,7 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
     }
 
     private void kiemY(Player p) {
-        if (charging) { hud(p, "§d Đang ngưng tụ Kiếm Ý..."); return; }
+        if (charging) { hud(p, "§d Condensing Sword Intent..."); return; }
         if (onCd(hs_kiemy, p, this)) return;
         charging = true;
         lastCombatTick = tickCounter;
@@ -454,7 +452,7 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
                 if (!p.isOnline()) { cancel(); return; }
                 tickCounter++;
 
-                if (tickCounter % 6 == 0 && p.getVelocity().lengthSquared() < 0.01) {
+                if (tickCounter % 6 == 0 && p.getVelocity().lengthSquared() < 0.01 && isAuraEnabled(p)) {
                     Location loc = p.getLocation().clone().add(0, 1.0, 0);
                     Color col = AURA_COLS[new Random().nextInt(AURA_COLS.length)];
                     particleApi.spawnColoredParticles(loc, col, 0.6f, 1,
@@ -466,8 +464,9 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
                         && p.getHealth() < p.getAttribute(Attribute.MAX_HEALTH).getValue()) {
                     p.setHealth(Math.min(p.getAttribute(Attribute.MAX_HEALTH).getValue(),
                             p.getHealth() + PASSIVE_REGEN_AMOUNT));
-                    particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 1, 0),
-                            C_VIOLET_DUSK, 0.7f, 4, 0.3, 0.5, 0.3);
+                    if (isAuraEnabled(p))
+                        particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 1, 0),
+                                C_VIOLET_DUSK, 0.7f, 4, 0.3, 0.5, 0.3);
                 }
 
                 long now = System.currentTimeMillis();
@@ -498,12 +497,12 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
     }
 
     private String stageNameForXp(int xp) {
-        if (xp >= UNLOCK_5) return "Kiếm Ý Đại Thành";
-        if (xp >= UNLOCK_4) return "Thái Thượng";
-        if (xp >= UNLOCK_3) return "Trưởng Lão";
-        if (xp >= UNLOCK_2) return "Đích Truyền";
-        if (xp >= UNLOCK_1) return "Nội Môn";
-        return "Nhập Môn";
+        if (xp >= UNLOCK_5) return "Perfect Sword Intent";
+        if (xp >= UNLOCK_4) return "Supreme";
+        if (xp >= UNLOCK_3) return "Elder";
+        if (xp >= UNLOCK_2) return "Direct Disciple";
+        if (xp >= UNLOCK_1) return "Inner Disciple";
+        return "Outer Disciple";
     }
 
     private boolean isSlotUnlocked(Player p, int slot) {
@@ -582,3 +581,4 @@ public class HuaShanPower extends Power implements IdlePower, Removeable {
     }
 
 }
+

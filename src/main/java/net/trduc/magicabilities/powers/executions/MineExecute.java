@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.powers.executions;
+package net.trduc.magicabilitiesfork.powers.executions;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -8,3 +8,4 @@ public class MineExecute extends Execute{
         super(event, player);
     }
 }
+

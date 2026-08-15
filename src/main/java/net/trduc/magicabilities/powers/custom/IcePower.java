@@ -1,11 +1,10 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.misc.GeneralMethods;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.misc.GeneralMethods;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -21,15 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class IcePower extends Power implements IdlePower {
     private static final String ice_bolt = "ice.bolt";
+    private static final String ice_freeze_counter = "ice.freeze-counter";
     private static final String ice_machine_gun = "ice.machine-gun";
     private static final String ice_spikes = "ice.spikes";
     private static final String ice_star = "ice.star";
@@ -247,7 +246,13 @@ public class IcePower extends Power implements IdlePower {
         }
     }
     private void damagedByExecute(DamagedByExecute ex){
+        Player p = ex.getPlayer();
+        if (CooldownApi.isOnCooldown(ice_freeze_counter, p)) return;
+
         Entity damager = ((EntityDamageByEntityEvent) ex.getRawEvent()).getDamager();
+        if (!(damager instanceof LivingEntity)) return;
+
+        addCd(ice_freeze_counter, p);
         damager.setFreezeTicks(damager.getMaxFreezeTicks()*4);
     }
     private void iceSpikesFromBelow(LeftClickExecute execute, double initM){
@@ -274,9 +279,10 @@ public class IcePower extends Power implements IdlePower {
 
             @Override
             public void run() {
-                if (p == null){
+                if (!p.isOnline()){
                     as.remove();
                     cancel();
+                    return;
                 }
 
                 Location ground = as.getLocation().clone();
@@ -359,30 +365,26 @@ public class IcePower extends Power implements IdlePower {
 
             @Override
             public void run() {
-                if (p == null){
+                if (!p.isOnline()){
                     as.remove();
                     cancel();
+                    return;
                 }
 
                 particleApi.spawnColoredParticles(as.getLocation(), colors[r.nextInt(colors.length)], 1, 10, 0.1, 0.1, 0.1);
                 if (r.nextBoolean()) particleApi.spawnParticles(as.getLocation(), Particle.SNOWFLAKE, r.nextInt(10)+1, 0.1, 0.1, 0.1, 0.01);
                 as.teleport(as.getLocation().add(v.normalize().multiply(speed)));
 
-                for (Entity entity : as.getLocation().getChunk().getEntities()){
+                for (Entity entity : as.getLocation().getWorld().getNearbyEntities(as.getLocation(), 1.5, 1.5, 1.5)){
                     if (!as.isDead()){
-                        if (entity instanceof ArmorStand){
-                            continue;
-                        }
-                        if (as.getLocation().distanceSquared(entity.getLocation()) <= 3.8){
-                            if (!entity.equals(p)){
-                                if (entity instanceof LivingEntity){
-                                    ((LivingEntity) entity).damage(calculateDamage(p, (LivingEntity) entity, initM), p);
-                                    entity.setFreezeTicks(entity.getMaxFreezeTicks()*6);
-                                    spawnSpellHitParticles(as.getLocation().clone());
-                                    as.remove();
-                                    cancel();
-                                }
-                            }
+                        if (entity instanceof ArmorStand) continue;
+                        if (entity.equals(p)) continue;
+                        if (entity instanceof LivingEntity){
+                            ((LivingEntity) entity).damage(calculateDamage(p, (LivingEntity) entity, initM), p);
+                            entity.setFreezeTicks(entity.getMaxFreezeTicks()*6);
+                            spawnSpellHitParticles(as.getLocation().clone());
+                            as.remove();
+                            cancel();
                         }
                     }
                 }
@@ -554,3 +556,4 @@ public class IcePower extends Power implements IdlePower {
         }
     }
 }
+

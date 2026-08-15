@@ -1,23 +1,21 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class SoundPower extends Power implements IdlePower, Removeable {
 
@@ -100,7 +98,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                 for (Entity e : p.getWorld().getNearbyEntities(center, radius + 0.5, radius + 0.5, radius + 0.5)) {
                     if (!(e instanceof LivingEntity) || e.equals(p)) continue;
                     if (hit.contains(e.getUniqueId())) continue;
-                    
+
                     Vector toE = e.getLocation().toVector().subtract(origin.toVector()).normalize();
                     if (toE.dot(dir) < 0.4) continue;
                     hit.add(e.getUniqueId());
@@ -157,7 +155,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                 tgt.setNoDamageTicks(0);
                 tgt.damage(damage, p);
                 dissonanceMarked.remove(tgt.getUniqueId());
-                
+
                 for (int i = 0; i < 16; i++) {
                     double a = Math.toRadians(i * 22.5);
                     Location pt = tgt.getLocation().clone().add(0, 1, 0)
@@ -189,7 +187,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                 double rad = t * 0.85;
                 for (int i = 0; i < 36; i++) {
                     double ang = Math.toRadians(i * 10 + (t % 2 == 0 ? 5 : 0));
-                    
+
                     double r2 = rad + (i % 3 == 0 ? 0.3 : i % 3 == 1 ? -0.2 : 0.1);
                     Location pt = center.clone().add(Math.cos(ang) * r2, 0, Math.sin(ang) * r2);
                     particleApi.spawnColoredParticles(pt, C_DISSONANCE, 1.2f, 1, 0.02, 0.05, 0.02);
@@ -210,7 +208,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                     applyPotion(le, PotionEffectType.SLOWNESS,        80, 1);
                     applyPotion(le, PotionEffectType.MINING_FATIGUE,  60, 2);
                     dissonanceMarked.add(e.getUniqueId());
-                    
+
                     for (int i = 0; i < 6; i++) {
                         Location pt = le.getLocation().clone().add(
                                 r.nextDouble() * 0.8 - 0.4, r.nextDouble() * 2,
@@ -221,7 +219,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                             Particle.NOTE, 3, 0.2, 0.2, 0.2, 1);
                     p.getWorld().playSound(le.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 0.5f, 0.3f);
                 }
-                
+
                 new BukkitRunnable() {
                     @Override
                     public void run() { dissonanceMarked.clear(); }
@@ -297,7 +295,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                     LivingEntity le = (LivingEntity) e;
                     applyPotion(le, PotionEffectType.WITHER,  60, 0);
                     applyPotion(le, PotionEffectType.SLOWNESS, 40, 0);
-                    
+
                     Vector flee = e.getLocation().toVector()
                             .subtract(origin.toVector()).normalize().multiply(1.5)
                             .add(new Vector(0, 0.4, 0));
@@ -336,7 +334,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                 }
             }.runTaskLater(magicPlugin, i);
         }
-        
+
         for (int i = 0; i < 25; i++) {
             int fi = i;
             new BukkitRunnable() {
@@ -392,7 +390,7 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                                         DOMAIN_COLS[r.nextInt(DOMAIN_COLS.length)], 1.2f, 1, 0.1, 0.1, 0.1);
                             }
                         }
-                        
+
                         if (i % 20 == 0) {
                             double beatRad = (i / 20 % 5) * 5.0;
                             for (int j = 0; j < 48; j++) {
@@ -407,6 +405,18 @@ public class SoundPower extends Power implements IdlePower, Removeable {
                         }
 
                         applyDomainDebuffs(p, center, (int) remaining);
+
+                        if (i % 2 == 0) {
+                            int borderPts = 56;
+                            for (int b = 0; b < borderPts; b++) {
+                                double ba = Math.toRadians(b * (360.0 / borderPts) + i * 1.5);
+                                Location bl = start.clone().add(Math.cos(ba) * 25, 0.15, Math.sin(ba) * 25);
+                                particleApi.spawnColoredParticles(bl, C_INDIGO, 1.6f, 1, 0.01, 0.08, 0.01);
+                                if (b % 7 == 0)
+                                    particleApi.spawnColoredParticles(bl.clone().add(0, 0.5, 0), C_LAVENDER, 1.3f, 1, 0.01, 0.05, 0.01);
+                            }
+                        }
+
                         remaining -= 0.05;
                         i++;
                     }
@@ -436,12 +446,12 @@ public class SoundPower extends Power implements IdlePower, Removeable {
             public void run() {
                 if (!p.isOnline()) { cancel(); return; }
                 if (isAuraEnabled(p)) {
-                    
+
                     particleCircle(p.getLocation().clone().add(0, 0.06, 0),
                             0.65, C_CYAN, 0.9f, 6, t * 20);
                     particleCircle(p.getLocation().clone().add(0, 0.06, 0),
                             0.65, C_INDIGO, 0.8f, 4, -t * 20 + 45);
-                    
+
                     if (t % 3 == 0) {
                         double ang = Math.toRadians(t * 40);
                         Location notePt = p.getLocation().clone().add(
@@ -475,3 +485,4 @@ public class SoundPower extends Power implements IdlePower, Removeable {
         }
     }
 }
+

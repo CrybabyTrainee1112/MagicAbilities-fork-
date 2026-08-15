@@ -1,12 +1,10 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -18,11 +16,11 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.cooldowns.Cooldowns.cooldowns;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class DemonLordPower extends Power implements IdlePower, Removeable {
 
@@ -33,6 +31,7 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
     private static final String dl_step      = "demonlord.shadow_step";
     private static final String dl_judgment  = "demonlord.judgment";
     private static final String dl_fury      = "demonlord.fury";
+    private static final String dl_counter   = "demonlord.counter";
 
     private static final Color C_BLOOD      = Color.fromRGB(200,   5,   5);
     private static final Color C_BLOOD_DK   = Color.fromRGB(110,   0,   0);
@@ -54,7 +53,9 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
 
     private final List<BukkitRunnable> summonedSouls = new ArrayList<>();
     private final Set<WitherSkeleton> summonedSkeletons = new HashSet<>();
-    private UUID lastTargetId = null; 
+    private UUID lastTargetId = null;
+    private BukkitRunnable soulWarriorTask = null;
+    private org.bukkit.event.Listener soulWarriorListener = null;
 
     private final Map<UUID, BukkitRunnable> prisonedTargets = new HashMap<>();
 
@@ -171,6 +172,8 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
             if (sk != null && !sk.isDead()) sk.remove();
         }
         summonedSkeletons.clear();
+        if (soulWarriorTask != null) { try { soulWarriorTask.cancel(); } catch (Exception ignored) {} soulWarriorTask = null; }
+        if (soulWarriorListener != null) { org.bukkit.event.HandlerList.unregisterAll(soulWarriorListener); soulWarriorListener = null; }
 
         final List<WitherSkeleton> skeletons = new ArrayList<>();
         final org.bukkit.World world = p.getWorld();
@@ -192,7 +195,7 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
             sk.setCustomName("§5Soul Warrior");
             sk.setCustomNameVisible(true);
             sk.setAI(true);
-            
+
             skeletons.add(sk);
             summonedSkeletons.add(sk);
         }
@@ -213,7 +216,7 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
                 }
 
                 if (newTarget instanceof Player && !newTarget.equals(p)) {
-                    
+
                     if (!newTarget.getUniqueId().equals(lastTargetId)) {
                         e.setCancelled(true);
                         return;
@@ -221,14 +224,15 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
                 }
             }
         };
+        soulWarriorListener = targetListener;
         magicPlugin.getServer().getPluginManager().registerEvents(targetListener, magicPlugin);
 
-        new BukkitRunnable() {
+        soulWarriorTask = new BukkitRunnable() {
             int elapsed = 0;
             @Override
             public void run() {
-                if (elapsed >= 200 || !p.isOnline()) { 
-                    
+                if (elapsed >= 200 || !p.isOnline()) {
+
                     for (WitherSkeleton sk : skeletons) {
                         if (!sk.isDead() && sk.isValid()) {
                             particleApi.spawnColoredParticles(sk.getLocation().clone().add(0, 1, 0),
@@ -242,6 +246,8 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
                     skeletons.clear();
                     summonedSkeletons.clear();
                     org.bukkit.event.HandlerList.unregisterAll(targetListener);
+                    soulWarriorListener = null;
+                    soulWarriorTask = null;
                     hud(p, "§7Soul Warriors have vanished.");
                     cancel();
                     return;
@@ -262,7 +268,8 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
 
                 elapsed += 20;
             }
-        }.runTaskTimer(magicPlugin, 20L, 20L);
+        };
+        soulWarriorTask.runTaskTimer(magicPlugin, 20L, 20L);
     }
 
     private void drawSoul(Location loc, int idx, int t) {
@@ -367,7 +374,7 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
                     if (t % 5 == 0)
                         particleApi.spawnParticles(pt, Particle.FLAME, 2, 0.1, 0.2, 0.1, 0.06f);
                 }
-                
+
                 double rad = t * 0.45;
                 for (int j = 0; j < 36; j++) {
                     double ang = Math.toRadians(j * 10);
@@ -427,13 +434,13 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
                     if (e.equals(p) || !(e instanceof LivingEntity)) continue;
                     LivingEntity le = (LivingEntity) e;
                     double dist = e.getLocation().distance(center);
-                    
+
                     double dmg = 35 - (dist / 8.0) * 17;
                     le.setNoDamageTicks(0);
                     le.damage(dmg, p);
                     le.setFireTicks(100);
                     le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, false, true));
-                    
+
                     Vector away = e.getLocation().subtract(center).toVector();
                     if (away.lengthSquared() > 0.01)
                         e.setVelocity(away.normalize().multiply(1.0).setY(1.2));
@@ -681,7 +688,7 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
             p.setHealth(Math.min(getMaxHp(p), p.getHealth() + 4.0));
             spawnDeathSoul(target.getLocation().clone().add(0,1,0), p.getLocation().clone().add(0,1,0));
             p.getWorld().playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 0.5f);
-            
+
             if (target.getUniqueId().equals(lastTargetId)) lastTargetId = null;
         }
     }
@@ -691,9 +698,11 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
         EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) ex.getRawEvent();
         Entity attacker = event.getDamager();
         if (!(attacker instanceof LivingEntity) || attacker.equals(p)) return;
+        if (CooldownApi.isOnCooldown(dl_counter, p)) return;
 
         attacker.setFireTicks(40);
         ((LivingEntity) attacker).damage(4.0, p);
+        addCdFixed(dl_counter, p, 1.0);
     }
 
     @Override
@@ -783,6 +792,8 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
             if (sk != null && !sk.isDead()) sk.remove();
         }
         summonedSkeletons.clear();
+        if (soulWarriorTask != null) { try { soulWarriorTask.cancel(); } catch (Exception ignored) {} soulWarriorTask = null; }
+        if (soulWarriorListener != null) { org.bukkit.event.HandlerList.unregisterAll(soulWarriorListener); soulWarriorListener = null; }
         for (BukkitRunnable r : prisonedTargets.values()) { try { r.cancel(); } catch (Exception ignored) {} }
         prisonedTargets.clear();
         Player owner = getOwner();
@@ -822,3 +833,4 @@ public class DemonLordPower extends Power implements IdlePower, Removeable {
     }
 
 }
+

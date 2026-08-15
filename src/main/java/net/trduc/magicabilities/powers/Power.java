@@ -1,10 +1,10 @@
-package net.trduc.magicabilities.powers;
+package net.trduc.magicabilitiesfork.powers;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.trduc.magicabilities.powers.custom.*;
-import net.trduc.magicabilities.powers.executions.Execute;
+import net.trduc.magicabilitiesfork.powers.custom.*;
+import net.trduc.magicabilitiesfork.powers.executions.Execute;
 import org.bukkit.entity.Player;
 
 public abstract class Power {
@@ -105,6 +105,20 @@ public abstract class Power {
                 return new SoundPower(p);
             case SPIKE:
                 return new SpikePower(p);
+            case LUNAR:
+                return new LunarPower(p);
+            case COSMIC:
+                return new CosmicPower(p);
+            case ASSASSIN:
+                return new AssassinPower(p);
+            case CHRONARCH:
+                return new ChronarchPower(p);
+            case PUPPETEER:
+                return new PuppeteerPower(p);
+            case KAGEMUSHA:
+                return new KagemushaPower(p);
+            case VENOM_PALETTE:
+                return new VenomPalettePower(p);
             default:
                 return new Power(p) {
                     @Override
@@ -133,3 +147,4 @@ public abstract class Power {
                 s + "s."));
     }
 }
+

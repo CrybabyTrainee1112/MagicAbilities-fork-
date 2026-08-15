@@ -1,24 +1,21 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class DeathPower extends Power implements IdlePower, Removeable {
 
@@ -78,7 +75,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                     if (t > 6) { cancel(); return; }
                     Location from = p.getEyeLocation().clone();
                     Location to   = tgt.getEyeLocation().clone();
-                    
+
                     Vector step = to.clone().subtract(from).toVector().normalize().multiply(0.4);
                     Location cur = from.clone();
                     while (cur.distanceSquared(to) > 0.5) {
@@ -96,7 +93,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                     target.damage(22, p);
                     target.setNoDamageTicks(0);
                     applyPotion(target, PotionEffectType.WITHER, 60, 1);
-                    
+
                     particleApi.spawnParticles(target.getLocation().clone().add(0, 1, 0),
                             Particle.SMOKE, 30, 0.3, 0.5, 0.3, 0.05);
                     particleApi.spawnColoredParticles(target.getLocation().clone().add(0, 1, 0),
@@ -105,7 +102,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                 }
             }.runTaskLater(magicPlugin, 6);
         } else {
-            
+
             for (int i = 0; i < 16; i++) {
                 particleApi.spawnColoredParticles(
                         p.getLocation().clone().add(
@@ -146,7 +143,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                 }
 
                 if (!blade.getLocation().getBlock().isPassable()) {
-                    
+
                     for (int i = 0; i < 20; i++) {
                         particleApi.spawnColoredParticles(blade.getLocation(),
                                 SCYTHE_COLS[r.nextInt(SCYTHE_COLS.length)], 2f, 3, 0.2, 0.2, 0.2);
@@ -198,7 +195,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
             public void run() {
                 p.teleport(finalDest);
                 p.getWorld().playSound(finalDest, Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 1.8f);
-                
+
                 for (int i = 0; i < 20; i++) {
                     particleApi.spawnColoredParticles(
                             finalDest.clone().add(r.nextDouble()*0.6-0.3, r.nextDouble()*2, r.nextDouble()*0.6-0.3),
@@ -242,7 +239,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                     le.setNoDamageTicks(0);
                     le.damage(10, p);
                     applyPotion(le, PotionEffectType.SLOWNESS, 60, 1);
-                    
+
                     particleApi.spawnColoredParticles(le.getLocation().clone().add(0,1,0),
                             C_SOUL_WHITE, 1.3f, 8, 0.2, 0.2, 0.2);
                     totalHeal += 3;
@@ -293,7 +290,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                     particleApi.spawnColoredParticles(le.getLocation().clone().add(0,1,0),
                             C_DARK_GRAY, 2f, 12, 0.2, 0.3, 0.2);
                 }
-                
+
                 for (int i = 0; i < 40; i++) {
                     particleApi.spawnColoredParticles(
                             center.clone().add(r.nextDouble()*4-2, r.nextDouble()*2-0.5, r.nextDouble()*4-2),
@@ -334,7 +331,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                 }
             }.runTaskLater(magicPlugin, i);
         }
-        
+
         for (int i = 0; i < 30; i++) {
             int fi = i;
             new BukkitRunnable() {
@@ -389,7 +386,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                                 particleApi.spawnParticles(soul, Particle.SOUL, 1, 0.04, 0.04, 0.04, 0.01);
                             }
                         }
-                        
+
                         if (i % 10 == 0) {
                             for (int k = 0; k < 40; k++) {
                                 double ox = (r.nextDouble()*2-1)*30;
@@ -400,7 +397,7 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                                         DOMAIN_COLS[r.nextInt(DOMAIN_COLS.length)], 1.4f, 1, 0.3, 0.05, 0.3);
                             }
                         }
-                        
+
                         if (i % 20 == 0) {
                             double beatRad = (i / 20 % 6) * 5.0;
                             for (int j = 0; j < 48; j++) {
@@ -412,6 +409,19 @@ public class DeathPower extends Power implements IdlePower, Removeable {
                         }
 
                         applyDomainDebuffs(p, center, (int) remaining);
+
+                        if (i % 2 == 0) {
+                            int borderPts = 64;
+                            for (int b = 0; b < borderPts; b++) {
+                                double ba = Math.toRadians(b * (360.0 / borderPts) + i * 1.5);
+                                Location bl = start.clone().add(Math.cos(ba) * 30, 0.15, Math.sin(ba) * 30);
+                                particleApi.spawnColoredParticles(bl, C_BLACK, 2.0f, 1, 0.01, 0.1, 0.01);
+                                if (b % 8 == 0) {
+                                    particleApi.spawnColoredParticles(bl.clone().add(0, 0.5, 0), C_VOID, 1.5f, 1, 0.01, 0.06, 0.01);
+                                    particleApi.spawnParticles(bl.clone().add(0, 0.3, 0), Particle.SOUL, 1, 0.01, 0.05, 0.01, 0.01);
+                                }
+                            }
+                        }
 
                         remaining -= 0.05;
                         i++;
@@ -426,12 +436,12 @@ public class DeathPower extends Power implements IdlePower, Removeable {
             if (!(e instanceof LivingEntity)) continue;
             if (e.equals(owner)) continue;
             LivingEntity le = (LivingEntity) e;
-            
+
             if (e instanceof Player) {
                 applyPotion((Player) e, PotionEffectType.HUNGER, remainingSeconds*20, 4);
                 applyPotion((Player) e, PotionEffectType.MINING_FATIGUE, remainingSeconds*20, 1);
             }
-            
+
             applyPotion(le, PotionEffectType.WITHER, remainingSeconds*20, 0);
             applyPotion(le, PotionEffectType.GLOWING, remainingSeconds*20, 0);
         }
@@ -477,3 +487,4 @@ public class DeathPower extends Power implements IdlePower, Removeable {
         }
     }
 }
+

@@ -1,11 +1,10 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -17,11 +16,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class WitcherPower extends Power implements IdlePower, Removeable {
 
@@ -195,7 +193,8 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         for (Entity e : loc.getWorld().getNearbyEntities(loc, 6, 6, 6)) {
             if (e.equals(p) || e instanceof ArmorStand || !(e instanceof LivingEntity)) continue;
             double dist  = e.getLocation().distance(loc);
-            double dmg   = isAxiiMarked(e) ? (40 - dist * 4) * 1.6 : (40 - dist * 4);
+            double falloff = Math.max(0, 40 - dist * 4);
+            double dmg   = isAxiiMarked(e) ? falloff * 1.6 : falloff;
             ((LivingEntity) e).damage(Math.max(10, dmg), p);
             e.setFireTicks(140);
             e.setVelocity(e.getLocation().subtract(loc).toVector().normalize().multiply(1.5).setY(0.5));
@@ -504,7 +503,7 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 600, 0, false, false));
                 if (p.getHealth() < 8)
                     p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 50, 2, false, false));
-                if (t % 2 == 0)
+                if (t % 2 == 0 && isAuraEnabled(p))
                     particleApi.spawnColoredParticles(p.getLocation().clone().add(0, 1.8, 0),
                             Color.fromRGB(255, 220, 80), 0.8f, 2, 0.08, 0.05, 0.08);
                 axiiMarked.entrySet().removeIf(e -> e.getValue() < System.currentTimeMillis());
@@ -620,3 +619,4 @@ public class WitcherPower extends Power implements IdlePower, Removeable {
         }.runTask(magicPlugin);
     }
 }
+

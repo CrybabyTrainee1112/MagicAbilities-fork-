@@ -1,12 +1,11 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
@@ -18,11 +17,10 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.*;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.*;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class CultivatorPower extends Power implements IdlePower, Removeable {
 
@@ -333,7 +331,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
         };
         sealedTargets.put(target.getUniqueId(), sealRun);
         sealRun.runTaskTimer(magicPlugin, 0, 1);
-        hud(p, org.bukkit.ChatColor.GREEN + "✦ Phong Ấn!");
+        hud(p, org.bukkit.ChatColor.GREEN + "✦ Seal Technique!");
         return true;
     }
 
@@ -390,7 +388,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
     private void breathCultivation(Player p) {
         channeling = true;
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.5f);
-        hud(p, org.bukkit.ChatColor.GREEN + "... Phục Khí ...");
+        hud(p, org.bukkit.ChatColor.GREEN + "... Breath Recovery ...");
 
         final Location startLoc = p.getLocation().clone();
 
@@ -403,7 +401,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
                 }
                 if (p.getLocation().distance(startLoc) > 1.0) {
                     if (!channeling) { cancel(); return; }
-                    hud(p, org.bukkit.ChatColor.RED + "Phục Khí bị gián đoạn!");
+                    hud(p, org.bukkit.ChatColor.RED + "Breath Recovery interrupted!");
                     channeling = false; chanTask = null;
                     addCd(cv_medi, p, 0.5);
                     cancel(); return;
@@ -448,7 +446,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
         particleApi.spawnParticles(loc, Particle.TOTEM_OF_UNDYING, 10, 0.5, 0.5, 0.5, 0.4);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,    0.7f, 1.4f);
         p.getWorld().playSound(p.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE,  0.5f, 1.8f);
-        hud(p, org.bukkit.ChatColor.GOLD + "✦ Phục Khí! +" + healHp + "HP +" + rewardXp + "XP");
+        hud(p, org.bukkit.ChatColor.GOLD + "✦ Breath Recovery! +" + healHp + "HP +" + rewardXp + "XP");
         addCd(cv_medi, p);
         checkStageUp(p);
     }
@@ -698,7 +696,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
         target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER,   100, 2, false, true));
         target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, false, true));
         target.setVelocity(new Vector(0, 1.8, 0));
-        hud(p, org.bukkit.ChatColor.GOLD + "⚡ " + (int) dmg + " dmg" + (sealed ? " (PHONG ẤN)" : ""));
+        hud(p, org.bukkit.ChatColor.GOLD + "⚡ " + (int) dmg + " dmg" + (sealed ? " (SEAL)" : ""));
     }
 
     private void onDamaged(DamagedExecute ex) {
@@ -713,7 +711,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
             BukkitRunnable ct = chanTask;
             chanTask = null;
             try { ct.cancel(); } catch (Exception ignored) {}
-            ex.getPlayer().sendMessage(org.bukkit.ChatColor.RED + "Phục Khí bị gián đoạn bởi đòn tấn công!");
+            ex.getPlayer().sendMessage(org.bukkit.ChatColor.RED + "Breath Recovery interrupted by attack!");
             addCd(cv_medi, ex.getPlayer(), 0.5);
         }
     }
@@ -735,7 +733,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
                     particleApi.spawnColoredParticles(loc, C_JADE_LIGHT, 1.4f, 10, 0.5, 0.5, 0.5);
                     particleApi.spawnColoredParticles(loc, C_GOLD,       1.2f,  8, 0.6, 0.6, 0.6);
                     p.getWorld().playSound(loc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.5f);
-                    hud(p, org.bukkit.ChatColor.GREEN + "✦ Thiền định +2 XP");
+                    hud(p, org.bukkit.ChatColor.GREEN + "✦ Meditation +2 XP");
                     meditating = false; mediTask = null;
                     checkStageUp(p);
                     cancel(); return;
@@ -785,7 +783,7 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
     }
 
     private void onBreakthrough(Player p, int newStage) {
-        String[] names = {"", "Luyện Khí", "Trúc Cơ", "Kim Đan", "Nguyên Anh", "Hóa Thần", "Đại Thừa"};
+        String[] names = {"", "Qi Refining", "Foundation Building", "Golden Core", "Nascent Soul", "Spirit Transformation", "Great Vehicle"};
         String   name  = names[Math.min(newStage, 6)];
 
         p.sendMessage(org.bukkit.ChatColor.GOLD + "✦ " + org.bukkit.ChatColor.BOLD
@@ -913,23 +911,23 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
 
     @Override
     public String getAbilityName(int ability) {
-        String lock = isSlotUnlocked(ability) ? "" : " §7[Tầng " + stageNeeded(ability) + "]";
+        String lock = isSlotUnlocked(ability) ? "" : " §7[Floor " + stageNeeded(ability) + "]";
         switch (ability) {
-            case 0: return "§a劍氣 Kiếm Khí"           + lock;
-            case 1: return "§a封印術 Phong Ấn"           + lock;
-            case 2: return "§a靈壓 Linh Áp"             + lock;
-            case 3: return "§a服氣術 Phục Khí"           + lock;
-            case 4: return "§e雷劍陣 Lôi Kiếm Trận"     + lock;
+            case 0: return "§a劍氣 Sword Qi"           + lock;
+            case 1: return "§a封印術 Seal Technique"           + lock;
+            case 2: return "§a靈壓 Spirit Pressure"             + lock;
+            case 3: return "§a服氣術 Breath Recovery"           + lock;
+            case 4: return "§e雷劍陣 Thunder Sword Formation"     + lock;
             case 5: return "§6§l天道裁決"                + lock;
             default: return "§7none";
         }
     }
 
     private void hud(Player p, String msg) {
-        String[] names     = {"", "Luyện Khí", "Trúc Cơ", "Kim Đan", "Nguyên Anh", "Hóa Thần", "Đại Thừa"};
+        String[] names     = {"", "Qi Refining", "Foundation Building", "Golden Core", "Nascent Soul", "Spirit Transformation", "Great Vehicle"};
         String   stageName = names[Math.min(maxReachedStage, 6)];
         String   color     = maxReachedStage >= 5 ? "§6" : maxReachedStage >= 3 ? "§a" : "§7";
-        String   bar       = color + "✦ " + stageName + " §7[Tầng " + maxReachedStage + "/6]";
+        String   bar       = color + "✦ " + stageName + " §7[Floor " + maxReachedStage + "/6]";
         String   m         = msg != null ? " §r §f" + msg : "";
         p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(bar + m));
     }
@@ -949,3 +947,4 @@ public class CultivatorPower extends Power implements IdlePower, Removeable {
     private int stageNeeded(int slot) { return slot + 1; }
 
 }
+

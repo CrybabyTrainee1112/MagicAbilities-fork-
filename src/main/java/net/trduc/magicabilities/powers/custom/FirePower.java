@@ -1,11 +1,10 @@
-package net.trduc.magicabilities.powers.custom;
+package net.trduc.magicabilitiesfork.powers.custom;
 
-import net.trduc.magicabilities.cooldowns.CooldownApi;
-import net.trduc.magicabilities.powers.IdlePower;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.Removeable;
-import net.trduc.magicabilities.powers.executions.*;
-import net.trduc.magicabilities.powers.executions.*;
+import net.trduc.magicabilitiesfork.cooldowns.CooldownApi;
+import net.trduc.magicabilitiesfork.powers.IdlePower;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.Removeable;
+import net.trduc.magicabilitiesfork.powers.executions.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -16,13 +15,12 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.misc.PowerUtils.*;
-import static net.trduc.magicabilities.MagicAbilities.particleApi;
-import static net.trduc.magicabilities.cooldowns.Cooldowns.cooldowns;
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.misc.GeneralMethods.rotateVector;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.misc.PowerUtils.*;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.particleApi;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.misc.GeneralMethods.rotateVector;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class FirePower extends Power implements IdlePower, Removeable {
 
@@ -164,7 +162,7 @@ public class FirePower extends Power implements IdlePower, Removeable {
         particleApi.spawnParticles(loc, Particle.FLAME, 30, 0.5, 0.5, 0.5, 0.15);
         particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 200, 0), 1.5f, 20, 0.4, 0.4, 0.4);
 
-        spawnFireRing(loc, (int) radius);
+        spawnFireRing(loc, (int) radius, 40L);
 
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.4f);
         loc.getWorld().playSound(loc, Sound.ITEM_FIRECHARGE_USE, 1f, 0.8f);
@@ -338,7 +336,7 @@ public class FirePower extends Power implements IdlePower, Removeable {
         particleApi.spawnParticles(loc, Particle.FLAME, 50, 1.5, 1.5, 1.5, 0.2);
         particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 220, 0), 2f, 40, 1, 1, 1);
 
-        spawnFireRing(loc, 8);
+        spawnFireRing(loc, 8, 60L);
 
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1f, 0.7f);
         loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_HURT_ON_FIRE, 1f, 0.8f);
@@ -420,7 +418,7 @@ public class FirePower extends Power implements IdlePower, Removeable {
     private void meteorImpact(Location loc, Player p) {
         particleApi.spawnParticles(loc, Particle.FLAME, 40, 1.0, 1.0, 1.0, 0.15);
         particleApi.spawnColoredParticles(loc, Color.fromRGB(255, 180, 0), 2f, 30, 0.8, 0.8, 0.8);
-        spawnFireRing(loc, 4);
+        spawnFireRing(loc, 4, 40L);
 
         loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.9f, 1.1f);
         loc.getWorld().playSound(loc, Sound.ENTITY_BLAZE_DEATH, 0.6f, 1.4f);
@@ -595,51 +593,5 @@ public class FirePower extends Power implements IdlePower, Removeable {
         }
     }
 
-    private void spawnFireRing(Location center, int radius) {
-        final int r = Math.min(radius, 3);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Location ground = getGroundBelow(center);
-                for (int x = -r; x <= r; x++) {
-                    for (int z = -r; z <= r; z++) {
-                        if (x * x + z * z <= r * r) {
-                            Location bl = ground.clone().add(x, 0, z);
-                            Block b = bl.getBlock();
-                            if (b.isPassable() && !b.isLiquid() && b.getType() != Material.FIRE) {
-                                b.setType(Material.FIRE);
-                            }
-                        }
-                    }
-                }
-                restoreFireRing(ground, r, 60L);
-            }
-        }.runTask(magicPlugin);
-    }
-
-    private void restoreFireRing(Location center, int radius, long delayTicks) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (int x = -radius; x <= radius; x++) {
-                    for (int z = -radius; z <= radius; z++) {
-                        if (x * x + z * z <= radius * radius) {
-                            Block b = center.clone().add(x, 0, z).getBlock();
-                            if (b.getType() == Material.FIRE) b.setType(Material.AIR);
-                        }
-                    }
-                }
-            }
-        }.runTaskLater(magicPlugin, delayTicks);
-    }
-
-    private void restoreBlocks(HashMap<Block, Material> blocks, long delayTicks) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Block b : blocks.keySet()) b.setType(blocks.get(b));
-                blocks.clear();
-            }
-        }.runTaskLater(magicPlugin, delayTicks);
-    }
 }
+
