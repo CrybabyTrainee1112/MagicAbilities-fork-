@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.guis;
+package net.trduc.magicabilitiesfork.guis;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,3 +21,4 @@ public class AnimationManager {
         }
     }
 }
+

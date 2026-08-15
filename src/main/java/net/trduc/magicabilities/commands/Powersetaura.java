@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.commands;
+package net.trduc.magicabilitiesfork.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,8 +11,10 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.trduc.magicabilities.data.PlayerData.getPlayerData;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.data.PlayerData.getPlayerData;
+import static net.trduc.magicabilitiesfork.data.PlayerData.savePlayerDataToDb;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class Powersetaura implements CommandExecutor, TabCompleter {
 
@@ -53,11 +55,12 @@ public class Powersetaura implements CommandExecutor, TabCompleter {
 
         players.get(p).setAuraEnabled(target);
         getPlayerData(p).setAuraEnabled(target);
+        savePlayerDataToDb(p, magicPlugin.getDbManager());
 
         if (target) {
-            p.sendMessage(ChatColor.GREEN + "✦ Aura " + ChatColor.BOLD + "enabled" + ChatColor.RESET + ChatColor.GREEN + ".");
+            p.sendMessage(ChatColor.GREEN + "Aura " + ChatColor.BOLD + "enabled" + ChatColor.RESET + ChatColor.GREEN + ".");
         } else {
-            p.sendMessage(ChatColor.RED + "✦ Aura " + ChatColor.BOLD + "disabled" + ChatColor.RESET + ChatColor.RED + ". Your passive particle effects will no longer be displayed.");
+            p.sendMessage(ChatColor.RED + "Aura " + ChatColor.BOLD + "disabled" + ChatColor.RESET + ChatColor.RED + ". Your passive particle effects will no longer be displayed.");
         }
         return true;
     }
@@ -75,3 +78,4 @@ public class Powersetaura implements CommandExecutor, TabCompleter {
         return new ArrayList<>();
     }
 }
+

@@ -1,10 +1,12 @@
-package net.trduc.magicabilities.cooldowns;
+package net.trduc.magicabilitiesfork.cooldowns;
 
+import net.trduc.magicabilitiesfork.misc.CooldownValidator;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class Cooldowns {
     public static Cooldowns cooldowns = null;
@@ -24,10 +26,12 @@ public class Cooldowns {
 
     private void createCooldowns(){
         for (String s: config.getKeys(false)){
-            for (String key: ((MemorySection) config.get(s)).getKeys(false)){
-                String fullKey = s+"."+key;
-                if (cds.containsKey(fullKey)) cds.replace(fullKey, config.getDouble(fullKey));
-                else cds.put(fullKey, config.getDouble(fullKey));
+            if (config.get(s) instanceof MemorySection) {
+                for (String key: ((MemorySection) config.get(s)).getKeys(false)){
+                    String fullKey = s+"."+key;
+                    if (cds.containsKey(fullKey)) cds.replace(fullKey, config.getDouble(fullKey));
+                    else cds.put(fullKey, config.getDouble(fullKey));
+                }
             }
         }
         for (String s : cds.keySet()){
@@ -36,6 +40,18 @@ public class Cooldowns {
     }
 
     public Double get(String s){
+        if (!cds.containsKey(s)) {
+            Logger log = Bukkit.getServer().getLogger();
+            double fallback = CooldownValidator.getFallback();
+            log.warning("[MagicAbilitiesfork] Cooldown key \"" + s
+                    + "\" does not exist in cooldowns.yml! Using fallback "
+                    + fallback + "s to avoid crash.");
+            cds.put(s, fallback);
+            try {
+                CooldownApi.createCooldown(s, fallback);
+            } catch (IllegalArgumentException ignored) {}
+            return fallback;
+        }
         return cds.get(s);
     }
 
@@ -43,3 +59,4 @@ public class Cooldowns {
         return cds.containsKey(s);
     }
 }
+

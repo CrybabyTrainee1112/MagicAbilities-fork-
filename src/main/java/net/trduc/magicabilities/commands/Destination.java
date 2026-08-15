@@ -1,6 +1,6 @@
-package net.trduc.magicabilities.commands;
+package net.trduc.magicabilitiesfork.commands;
 
-import net.trduc.magicabilities.powers.custom.WarpPower;
+import net.trduc.magicabilitiesfork.powers.custom.WarpPower;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class Destination implements CommandExecutor, TabCompleter {
     @Override
@@ -23,6 +23,10 @@ public class Destination implements CommandExecutor, TabCompleter {
             return false;
         }
         Player p = (Player) sender;
+        if (!players.containsKey(p)){
+            p.sendMessage(ChatColor.RED + "Something went wrong!");
+            return true;
+        }
         if (!(players.get(p).getPower() instanceof WarpPower)){
             p.sendMessage(ChatColor.RED + "You can't use this command!");
             return true;
@@ -121,3 +125,4 @@ public class Destination implements CommandExecutor, TabCompleter {
         }
     }
 }
+

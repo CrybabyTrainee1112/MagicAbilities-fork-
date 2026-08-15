@@ -1,9 +1,13 @@
-package net.trduc.magicabilities.data;
+package net.trduc.magicabilitiesfork.data;
 
-import net.trduc.magicabilities.players.PowerPlayer;
-import net.trduc.magicabilities.powers.Power;
-import net.trduc.magicabilities.powers.PowerType;
-import net.trduc.magicabilities.powers.RandomPowerAssigner;
+import net.trduc.magicabilitiesfork.events.ExecutionEvents;
+import net.trduc.magicabilitiesfork.intrinsics.IntrinsicId;
+import net.trduc.magicabilitiesfork.intrinsics.IntrinsicManager;
+import net.trduc.magicabilitiesfork.intrinsics.player.PlayerIntrinsicStorage;
+import net.trduc.magicabilitiesfork.players.PowerPlayer;
+import net.trduc.magicabilitiesfork.powers.Power;
+import net.trduc.magicabilitiesfork.powers.PowerType;
+import net.trduc.magicabilitiesfork.powers.RandomPowerAssigner;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,22 +16,27 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import static net.trduc.magicabilities.MagicAbilities.magicPlugin;
-import static net.trduc.magicabilities.data.PlayerData.*;
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.MagicAbilitiesfork.magicPlugin;
+import static net.trduc.magicabilitiesfork.data.PlayerData.*;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class DataEventsHandler implements Listener {
     private final DbManager dbManager;
+    private final ExecutionEvents executionEvents;
+    private final IntrinsicManager intrinsicManager;
+    private final PlayerIntrinsicStorage playerIntrinsicStorage;
 
-    public DataEventsHandler(DbManager dbManager) {
+    public DataEventsHandler(DbManager dbManager, ExecutionEvents executionEvents,
+                              IntrinsicManager intrinsicManager, PlayerIntrinsicStorage playerIntrinsicStorage) {
         this.dbManager = dbManager;
+        this.executionEvents = executionEvents;
+        this.intrinsicManager = intrinsicManager;
+        this.playerIntrinsicStorage = playerIntrinsicStorage;
     }
 
     @EventHandler
     public void onSlotSwap(PlayerItemHeldEvent event){
-        if (!players.containsKey(event.getPlayer())){
-            return;
-        }
+        if (!players.containsKey(event.getPlayer())) return;
         players.get(event.getPlayer()).setActiveSlot(event.getNewSlot());
     }
 
@@ -44,7 +53,7 @@ public class DataEventsHandler implements Listener {
         new PowerPlayer(Power.getPowerFromPowerType(event.getPlayer(), getPlayerData(event.getPlayer()).getPower()), getPlayerData(event.getPlayer()).getBinds(), getPlayerData(event.getPlayer()).isEnabled(), getPlayerData(event.getPlayer()).isAuraEnabled());
 
         if (getPlayerData(event.getPlayer()).getPower() == PowerType.NONE) {
-            PowerType assigned = RandomPowerAssigner.randomPower();
+            PowerType assigned = RandomPowerAssigner.randomPower(getPlayerData(event.getPlayer()));
             players.get(event.getPlayer()).changePower(assigned);
             new BukkitRunnable() {
                 @Override
@@ -63,6 +72,10 @@ public class DataEventsHandler implements Listener {
                 }
             }.runTaskLater(magicPlugin, 1);
         }
+
+        for (IntrinsicId id : playerIntrinsicStorage.getActive(event.getPlayer().getUniqueId())) {
+            intrinsicManager.equip(event.getPlayer(), id);
+        }
     }
 
     @EventHandler
@@ -73,5 +86,8 @@ public class DataEventsHandler implements Listener {
             players.get(event.getPlayer()).remove();
             players.remove(event.getPlayer());
         }
+        executionEvents.cleanup(event.getPlayer());
+        intrinsicManager.unequipAll(event.getPlayer());
     }
 }
+

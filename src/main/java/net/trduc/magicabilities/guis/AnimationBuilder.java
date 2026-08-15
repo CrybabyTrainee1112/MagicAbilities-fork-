@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.guis;
+package net.trduc.magicabilitiesfork.guis;
 
 import de.themoep.inventorygui.InventoryGui;
 import org.bukkit.entity.Player;
@@ -7,7 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 
-import static net.trduc.magicabilities.guis.AnimationManager.skipAnim;
+import static net.trduc.magicabilitiesfork.guis.AnimationManager.skipAnim;
 
 public class AnimationBuilder {
 
@@ -28,6 +28,10 @@ public class AnimationBuilder {
     }
 
     public void run(){
+        if (animGuis.isEmpty()) {
+            return;
+        }
+        addPlayerToAnimation(player);
         new BukkitRunnable() {
             int i = 0;
             @Override
@@ -56,3 +60,4 @@ public class AnimationBuilder {
         skipAnim.remove(p);
     }
 }
+

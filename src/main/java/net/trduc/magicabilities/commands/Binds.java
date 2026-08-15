@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.commands;
+package net.trduc.magicabilitiesfork.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class Binds implements CommandExecutor, TabCompleter {
     @Override
@@ -91,3 +91,4 @@ public class Binds implements CommandExecutor, TabCompleter {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package net.trduc.magicabilities.cooldowns;
+package net.trduc.magicabilitiesfork.cooldowns;
 
 import com.google.common.cache.CacheBuilder;
 import org.bukkit.entity.Player;
@@ -66,3 +66,4 @@ public class CooldownApi {
         }
     }
 }
+

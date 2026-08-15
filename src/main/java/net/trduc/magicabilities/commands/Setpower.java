@@ -1,8 +1,8 @@
-package net.trduc.magicabilities.commands;
+package net.trduc.magicabilitiesfork.commands;
 
-import net.trduc.magicabilities.data.PlayerData;
-import net.trduc.magicabilities.powers.PowerType;
-import net.trduc.magicabilities.powers.RandomPowerAssigner;
+import net.trduc.magicabilitiesfork.data.PlayerData;
+import net.trduc.magicabilitiesfork.powers.PowerType;
+import net.trduc.magicabilitiesfork.powers.RandomPowerAssigner;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.trduc.magicabilities.players.PowerPlayer.players;
+import static net.trduc.magicabilitiesfork.players.PowerPlayer.players;
 
 public class Setpower implements CommandExecutor, TabCompleter {
 
@@ -65,7 +65,7 @@ public class Setpower implements CommandExecutor, TabCompleter {
                                 + ") — skipped.");
                         continue;
                     }
-                    finalType = RandomPowerAssigner.randomPower();
+                    finalType = RandomPowerAssigner.randomPower(pd);
                     target.sendMessage(ChatColor.GOLD + "✦ You have received a random power: "
                             + ChatColor.YELLOW + ChatColor.BOLD + finalType.name().replace('_', ' '));
                 }
@@ -97,3 +97,4 @@ public class Setpower implements CommandExecutor, TabCompleter {
         if (val.regionMatches(true, 0, input, 0, input.length()) || input.isEmpty()) list.add(val);
     }
 }
+
