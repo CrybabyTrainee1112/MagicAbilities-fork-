@@ -1,8 +1,24 @@
-config-version: 1
+config-version: 2
 
 debug: true
 
-# ═══ SnowpartingBladePower — XP costs ═══
+boss-mastery:
+  quick-kill-seconds: 60
+  slow-kill-seconds: 240
+  max-tier: 5
+  min-tier: 0
+  hp-mult-per-tier: 0.15
+  dmg-mult-per-tier: 0.10
+
+fortress-boss-spawn:
+  enabled: true
+  boss-type: demon_lord
+  search-radius-chunks: 8
+  proximity-radius: 48
+  scan-interval-ticks: 100
+  max-spawns-per-fortress: 3
+  respawn-cooldown-minutes: 30
+
 snowblade:
   xp:
     slash: 3
@@ -10,10 +26,8 @@ snowblade:
     drive: 9
     arctic: 12
 
-# ═══ Tu Tiên Giả — CultivatorPower ═══
 cultivator:
 
-  # XP cost mỗi chiêu (điểm XP raw, không phải level)
   xp:
     sword-qi: 3
     sword-qi-sneak: 6
@@ -23,7 +37,6 @@ cultivator:
     thunder-array: 8
     judgment: 15
 
-  # Tu Vi thresholds (level cần để đột phá)
   stage:
     truc-co: 10
     kim-dan: 20
@@ -31,7 +44,6 @@ cultivator:
     hoa-than: 40
     dai-thua: 50
 
-  # Damage config
   dmg:
     sword-qi-base: 8.0
     sword-qi-per-stage: 2.0
@@ -40,35 +52,31 @@ cultivator:
     thunder-sword: 14.0
     judgment-ratio: 0.45
 
-  # Phục Khí Thuật
   meditate-heal-hp: 6
   meditate-reward-xp: 10
 
-# ═══ Hoa Sơn Kiếm Pháp — HuaShanPower ═══
 huashan:
 
-  # XP threshold để MỞ KHÓA từng slot (vĩnh viễn, không giảm khi mất XP)
-  # Không tốn XP khi DÙNG chiêu — chỉ tốn để unlock slot mới
   unlock:
-    slot1: 30    # 24 Chiêu Mai Hoa / Mai Hoa Bộ
-    slot2: 50    # Chấn Thiên Kiếm / Lạc Hoa Kiếm Pháp
-    slot3: 70    # Mai Hoa Ấn / Vô Hằng Kiếm
-    slot4: 90    # 72 Chiêu Mai Hoa / Bách Hoa Tự Tại Kiếm
-    slot5: 100   # Kiếm Ý (ultimate)
+    slot1: 30
+    slot2: 50
+    slot3: 70
+    slot4: 90
+    slot5: 100
 
   dmg:
-    tam-tai: 5.0           # mỗi tia trong 3 tia (x3 = tối đa 15)
-    luc-hop-reduction: 0.35   # % giảm dmg nhận khi buff active
-    luc-hop-duration: 4.0     # giây
-    nhi-thap-tu-hit: 4.0      # mỗi hit trong dash-chém (5 hit)
+    tam-tai: 5.0
+    luc-hop-reduction: 0.35
+    luc-hop-duration: 4.0
+    nhi-thap-tu-hit: 4.0
     nhi-thap-tu-hits: 5
     chan-thien: 9.0
-    chan-thien-stun: 1.2      # giây slowness nặng mô phỏng "phá thế thủ"
-    lac-hoa-reduction: 0.4    # % giảm dmg gây ra bởi địch trong vùng
+    chan-thien-stun: 1.2
+    lac-hoa-reduction: 0.4
     lac-hoa-radius: 4.0
     lac-hoa-duration: 5.0
     mai-hoa-an: 16.0
-    mai-hoa-an-armor-pierce: 0.5   # % bỏ qua giáp
+    mai-hoa-an-armor-pierce: 0.5
     vo-hang: 22.0
     that-thap-nhi-hit: 5.0
     that-thap-nhi-hits: 9
@@ -77,15 +85,13 @@ huashan:
     kiem-y-radius: 6.0
     kiem-y-dmg-per-tick: 3.0
     kiem-y-duration: 4.0
-    kiem-y-charge: 1.8        # giây charge trước khi release
+    kiem-y-charge: 1.8
 
-  # Tử Hà Thần Công — passive hồi nhẹ khi không combat
   passive:
-    regen-interval: 60        # ticks giữa mỗi lần hồi
-    regen-amount: 1.0         # HP hồi mỗi lần
-    max-hp-bonus: 2.0          # Hỗn Nguyên Công — bonus max HP (1 tim)
+    regen-interval: 60
+    regen-amount: 1.0
+    max-hp-bonus: 2.0
 
-# ═══ DemonLordPower ═══
 demonlord:
   dmg:
     inferno-blade: 16.0
@@ -100,7 +106,6 @@ demonlord:
     judgment-hp-ratio: 0.30
     fury-aoe: 12.0
 
-# ═══ GravityPower ═══
 gravity:
   dmg:
     pull: 6.0
@@ -110,7 +115,6 @@ gravity:
     collapse-base: 15.0
     collapse-hp-ratio: 0.20
 
-# ═══ PortalPower — Void / Arcane Gate ═══
 portal:
   xp:
     gate: 20
@@ -127,6 +131,10 @@ poison:
   xp:
     deluge: 22
 
+venompalette:
+  xp:
+    masterpiece: 24
+
 air:
   xp:
     collapse: 22
@@ -134,3 +142,120 @@ air:
 lunar:
   xp:
     domain: 0
+
+assassin:
+  dmg:
+    shadowstep-distance: 6.0
+    shadowstep-speed-ticks: 40
+    knives-count: 3
+    knives-dmg: 2.0
+    knives-bleed-max-stacks: 5
+    knives-bleed-duration: 6.0
+    knives-bleed-dmg-per-stack: 0.5
+    smokeveil-radius: 3.0
+    smokeveil-duration-ticks: 100
+    smokeveil-enemy-effect-ticks: 60
+    backstab-base-dmg: 5.0
+    backstab-bonus-dmg: 6.0
+    backstab-dash-distance: 3.0
+    clone-duration-ticks: 100
+    vanish-stealthed-dmg: 12.0
+    vanish-unstealthed-dmg: 6.0
+    vanish-range: 10.0
+    ult-duration-ticks: 70
+    ult-radius: 8.0
+    ult-hit-dmg: 2.5
+    ult-finisher-dmg: 7.0
+
+  xp:
+    nightofcuts: 30
+
+chronarch:
+  xp:
+    zerohour: 25
+
+  history:
+    window-seconds: 3.0
+    sample-interval-ticks: 2
+
+  dmg:
+    bolt: 7.0
+    bolt-slow-ticks: 20
+    rewind-heal-fraction: 0.4
+    haste-duration-ticks: 80
+    haste-tick-dmg: 3.0
+    stasis-duration-ticks: 50
+    stasis-release-dmg: 10.0
+    field-radius: 4.0
+    field-duration-ticks: 120
+    echo-hit-dmg: 6.0
+    echo-burst-dmg: 12.0
+    precog-distance: 5.0
+    precog-resistance-ticks: 20
+    zerohour-radius: 6.0
+    zerohour-freeze-ticks: 60
+    zerohour-impact-dmg: 8.0
+    zerohour-charge-ticks: 24
+
+puppeteer:
+  xp:
+    danse: 30
+
+  strings:
+    max: 3
+    leash-range: 20.0
+    string-range: 18.0
+    mitigation-fraction: 0.25
+
+  dmg:
+    string-prick: 1.5
+    yank-dmg: 2.5
+    yank-strength: 1.1
+    yank-pull-cap: 6.0
+    swap-safefall-ticks: 30
+    march-record-ticks: 60
+    march-stagger-ticks: 4
+    march-hit-radius: 1.2
+    march-collision-dmg: 3.5
+    cut-base-dmg: 4.0
+    cut-dmg-per-distance: 0.5
+    cut-dmg-max: 18.0
+    web-range: 20.0
+    web-radius: 3.0
+    web-duration-ticks: 200
+    loose-disorient-ticks: 40
+    loose-speed-ticks: 60
+    danse-duration-ticks: 100
+    danse-solo-radius: 10.0
+    danse-finisher-dmg: 9.0
+    danse-pull-strength: 0.9
+
+kagemusha:
+  xp:
+    frenzy: 30
+
+  doubles:
+    max: 3
+    duration-ticks: 100
+    delay-window-ticks: 20
+    spawn-interval-ticks: 14
+    spawn-min-distance: 0.3
+    miss-chance: 0.5
+
+  dmg:
+    ambush-range: 14.0
+    ambush-dmg-per-double: 3.0
+    dance-range: 10.0
+    dance-radius: 3.0
+    dance-duration-ticks: 60
+    dance-dizzy-ticks: 60
+    swap-safefall-ticks: 20
+    converge-heal-fraction: 0.20
+    diverge-radius: 6.0
+    diverge-aggro-radius: 10.0
+    frenzy-bonus-doubles: 6
+    frenzy-duration-ticks: 160
+    frenzy-hit-dmg: 2.5
+    frenzy-hit-interval-ticks: 8
+    frenzy-strike-radius: 8.0
+

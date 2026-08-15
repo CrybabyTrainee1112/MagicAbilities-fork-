@@ -34,6 +34,17 @@ commands:
   powerteamowner:
     description: Owner/admin team management (transfer/disband/leave/coowner)
     usage: /<command> <transfer|disband|leave|coowner>
+  powerboss:
+    description: Manage boss AI instances (summon/list/kill/info/mastery)
+    usage: /<command> <summon|list|kill|info|mastery>
+    permission: magic.admin
+  intrinsic:
+    description: Manage Intrinsic abilities (temporary admin/test command until Book/GUI acquisition exists)
+    usage: /<command> <give|clear|list> <player> [intrinsic_id]
+    permission: magic.admin
+  myintrinsics:
+    description: View, activate, or deactivate the Intrinsics you've learned from Intrinsic Books
+    usage: /<command> [activate|deactivate <intrinsic_id>]
 permissions:
   magic.admin:
     description: Admin-level permission for MagicAbilities
